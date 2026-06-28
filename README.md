@@ -1,1 +1,1 @@
-# latent-watch
+# Latent Watch
