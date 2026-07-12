@@ -7,7 +7,7 @@
 
 **Project Status:** Active; Stage 0 in progress
 
-**Full working log:** [link to research_log.md — TODO: paste hosted link here]
+**Full working log:** [link]
 
 ---
 
@@ -28,20 +28,20 @@ Reframed (with reviewer input) from a single probing question into a staged, fal
 |---|---|
 | 0  | Is the latent pathway causally load-bearing on safety prompts, or unused? |
 | 1  | Does the latent trajectory stay stable/non-degenerate off-distribution? |
-| 2 — Monitorability | Can linear probes detect safety-relevant signal in the latents? |
-| 3 — Temporal | Where in the trajectory does predictive signal emerge? |
+| 2 - Monitorability | Can linear probes detect safety-relevant signal in the latents? |
+| 3 - Temporal | Where in the trajectory does predictive signal emerge? |
 
 Stage 0 is a requirement: The checkpoint matrix we use comes from a paper (Dilgren & Wiegreffe, arXiv:2604.04902) that independently found latent tokens are often causally inert on logical-reasoning tasks. Skipping straight to probing would risk detecting signal in latents that aren't actually doing anything.
 
 ## Why we pivoted away from custom training (and why that pivot itself produced a finding)
 
-- The original design targeted a custom-trained Llama-3.1-8B COCONUT model, replicating Chang et al.'s training curriculum before extending it with a safety-probing layer. This failed during the CoT-replication stage — single-epoch training exceeded 14 hours, and a GPU disk failure during epoch 2 lost the run after ~$45 of compute.
+- The original design targeted a custom-trained Llama-3.1-8B COCONUT model, replicating Chang et al.'s training curriculum before extending it with a safety-probing layer. This failed during the CoT-replication stage - single-epoch training exceeded 14 hours, and a GPU disk failure during epoch 2 lost the run after ~$45 of compute.
 
 - We pivoted to Dilgren & Wiegreffe's released checkpoint matrix (`connordilgren/are-lrms-easily-interpretable`, MIT-licensed):
   -  GPT-2 and Llama-3.2-1B, across three datasets (GSM8K, ProntoQA, ProsQA) and six reasoning-format conditions (No-CoT, CoT, COCONUT, CODI, multimode variants).
   -  This let us run a controlled, cross-condition Stage 0 investigation at near-zero marginal compute cost via Colab: a methodological upgrade over the original single-checkpoint plan, not just a fallback.
 
-## What we've found so far (preliminary — see full log for caveats and sample sizes)
+## What we've found so far (preliminary - see full log for caveats and sample sizes)
 
 Running `early_stopping.run` (a necessity-ablation tool from the checkpoint repo) on BeaverTails safety prompts, across two COCONUT checkpoints:
 
@@ -53,11 +53,11 @@ Running `early_stopping.run` (a necessity-ablation tool from the checkpoint repo
 
 **Preliminary contrast with CoT** (same base model, same prompts): 
 
-Where COCONUT preserves output format but appears to ignore prompt content, the CoT checkpoint shows the opposite surface symptom. It frequently breaks the expected output format entirely (95% of generations didn't produce a parseable delimiter) while what *does* get through looks more content-engaged. This is not yet a confirmed finding — the non-skipped CoT sample was small and non-random, and a full-coverage rerun (logging all outputs regardless of format compliance) is in progress. **Do not cite this specific contrast externally without an update from the running log.**
+Where COCONUT preserves output format but appears to ignore prompt content, the CoT checkpoint shows the opposite surface symptom. It frequently breaks the expected output format entirely (95% of generations didn't produce a parseable delimiter) while what *does* get through looks more content-engaged. This is not yet a confirmed finding, the non-skipped CoT sample was small and non-random, and a full-coverage rerun (logging all outputs regardless of format compliance) is in progress. **Do not cite this specific contrast externally without an update from the running log.**
 
 ## Why this matters for the case to fund the original (8B, custom-trained) question
 
-The pretrained-checkpoint pivot was meant to be a low-cost way to make progress on the general research question while compute constraints were resolved. It has done more than that: it has surfaced a **concrete, load-bearing obstacle** where generalization/necessity failure under distribution shift — that any safety-monitoring approach built on these architectures will need to address before Stage 2 (probing) can produce interpretable results.
+The pretrained-checkpoint pivot was meant to be a low-cost way to make progress on the general research question while compute constraints were resolved. It has done more than that: it has surfaced a **concrete, load-bearing obstacle** where generalization/necessity failure under distribution shift that any safety-monitoring approach built on these architectures will need to address before Stage 2 (probing) can produce interpretable results.
 
 This is useful evidence for a funding request in two ways:
 
