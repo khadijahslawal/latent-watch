@@ -1,0 +1,4 @@
+.latent-watch-venv/
+.venv/
+__pycache__
+.DS_Store
