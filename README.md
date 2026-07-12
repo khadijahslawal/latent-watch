@@ -81,3 +81,7 @@ The checkpoint repo's tooling was built exclusively around GSM8K/ProntoQA/ProsQA
 2. Rule out generic small-model decoding degeneration (repetition loops) as a confound in the CoT results.
 3. Complete the three-way format comparison (COCONUT / CoT / No-CoT) on matched base model + dataset.
 4. Test a GSM8K-trained COCONUT checkpoint to check whether collapse is specific to narrow binary-answer domains like ProntoQA.
+
+## Data & Licensing
+
+Uses BeaverTails (CC BY-NC 4.0) for prompt data, and checkpoints/tooling from Dilgren & Wiegreffe's `are-lrms-easily-interpretable` (MIT) for the underlying experiments. Non-commercial research use only. Full citations and license terms in [`ATTRIBUTION.md`](./ATTRIBUTION.md).
