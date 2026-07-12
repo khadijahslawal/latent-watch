@@ -1,0 +1,3811 @@
+{
+  "timestamp": "20260712_175225",
+  "model_type": "coconut",
+  "model_path": "/content/drive/MyDrive/latent_safety_probing/checkpoints/gpt2-prontoqa-coconut/checkpoint_36",
+  "dataset_path": "/content/are-lrms-easily-interpretable/data/prontoqa_test.json",
+  "config": {
+    "base_model": "gpt2",
+    "num_latents": 6,
+    "mode": null,
+    "max_new_tokens": 256,
+    "top_k": 10,
+    "max_samples": 20,
+    "device": "cuda"
+  },
+  "samples": [
+    {
+      "sample_idx": 0,
+      "question": "Brimpuses are not luminous. Shumpuses are amenable. Each yumpus is a lorpus. Gorpuses are shumpuses. Each zumpus is a grimpus. Gorpuses are rompuses. Dumpuses are not floral. Lempuses are cold. Brimpuses are impuses. Every lorpus is floral. Every rompus is transparent. Grimpuses are muffled. Rompuses are yumpuses. Rompuses are wumpuses. Zumpuses are fast. Wumpuses are bitter. Every sterpus is orange. Each lorpus is a vumpus. Yumpuses are feisty. Each yumpus is a lempus. Gorpuses are snowy. Zumpuses are gorpuses. Every lorpus is a sterpus. Stella is a brimpus. Stella is a zumpus. True or false: Stella is not floral.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          3,
+          5
+        ],
+        "ranks": [
+          1,
+          2,
+          2
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "led",
+              "y",
+              "L",
+              ".",
+              "library",
+              "<|start-latent|>",
+              "la",
+              "ls"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              "###",
+              " floral",
+              "beaut",
+              "gold",
+              "stal",
+              "crypt",
+              "sea",
+              "elong",
+              "alph",
+              "lad"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              "\n",
+              " a",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              ":",
+              " an",
+              "y"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " floral",
+              " blue",
+              " False",
+              " flora",
+              " l",
+              " ecosystem",
+              " gastrointestinal",
+              "elong",
+              " earth",
+              " gardens"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              " an",
+              " the",
+              " or"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " floral",
+              " blue",
+              " False",
+              " l",
+              " flora",
+              " ecosystem",
+              " small",
+              " earth",
+              " gastrointestinal",
+              " garden"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              " an",
+              " the",
+              " or"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 1,
+      "question": "Each lorpus is a wumpus. Each dumpus is a numpus. Each wumpus is sour. Sterpuses are shumpuses. Lorpuses are sterpuses. Yumpuses are not feisty. Each yumpus is a zumpus. Each sterpus is not overcast. Each impus is earthy. Lorpuses are not dull. Every zumpus is a vumpus. Dumpuses are transparent. Every shumpus is a yumpus. Every zumpus is a brimpus. Gorpuses are not melodic. Vumpuses are wooden. Each yumpus is a lempus. Every zumpus is melodic. Every shumpus is an impus. Each sterpus is a rompus. Every shumpus is mean. Every lempus is not hot. Rompuses are not orange. Fae is a lorpus. Fae is a dumpus. True or false: Fae is melodic.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 5,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              "<|start-latent|>",
+              "<|end-latent|>",
+              "W",
+              "Y",
+              "Alex",
+              "led",
+              "uses",
+              "y"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              "y",
+              "S",
+              ".",
+              "led",
+              "us",
+              "T",
+              "W"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              "###",
+              " not",
+              "y",
+              "us",
+              ".",
+              " z",
+              "led",
+              " a"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              "###",
+              " not",
+              " z",
+              ".",
+              " a",
+              "us",
+              " y",
+              "y"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " not",
+              "###",
+              " z",
+              " a",
+              ".",
+              " y",
+              " n",
+              " t"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " not",
+              "###",
+              " z",
+              " a",
+              " y",
+              ".",
+              " t",
+              " n"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " not",
+              "###",
+              " z",
+              " a",
+              " y",
+              ".",
+              " t",
+              " n"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 2,
+      "question": "Jompuses are wumpuses. Jompuses are not slow. Wumpuses are overcast. Brimpuses are zumpuses. Every tumpus is aggressive. Every numpus is hot. Each gorpus is a tumpus. Lempuses are muffled. Grimpuses are brimpuses. Each zumpus is bright. Every wumpus is a numpus. Yumpuses are not opaque. Rompuses are not earthy. Each grimpus is red. Each vumpus is nervous. Lempuses are shumpuses. Brimpuses are sour. Brimpuses are gorpuses. Wumpuses are grimpuses. Gorpuses are sterpuses. Grimpuses are vumpuses. Each gorpus is earthy. Every jompus is a yumpus. Fae is a lempus. Fae is a jompus. True or false: Fae is earthy.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "ranks": [
+          6,
+          1,
+          1,
+          1,
+          3
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 6,
+            "top_k_tokens": [
+              "###",
+              "<|start-latent|>",
+              "W",
+              "<|end-latent|>",
+              "uses",
+              "led",
+              " True",
+              "ump",
+              "S",
+              "G"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              " earth",
+              "America",
+              "anch",
+              "alt",
+              "crypt",
+              "South",
+              "North"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              "<|endoftext|>",
+              " earth",
+              " a",
+              " not",
+              "us",
+              "p",
+              "W"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              " earth",
+              " am",
+              "alt",
+              "South",
+              "America",
+              " small",
+              "Alt"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              " an",
+              "us",
+              ":"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " earth",
+              " small",
+              " false",
+              " am",
+              " sour",
+              " recipients"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " a",
+              ".",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              " an",
+              " or",
+              ":"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 3,
+      "question": "Each rompus is liquid. Zumpuses are overcast. Each gorpus is melodic. Every impus is fast. Each gorpus is a tumpus. Rompuses are zumpuses. Shumpuses are lempuses. Tumpuses are yumpuses. Gorpuses are jompuses. Dumpuses are numpuses. Every dumpus is earthy. Every brimpus is blue. Shumpuses are not bright. Every numpus is not opaque. Every tumpus is a brimpus. Each dumpus is a gorpus. Jompuses are not nervous. Each lempus is cold. Every tumpus is not fast. Vumpuses are small. Rompuses are shumpuses. Shumpuses are dumpuses. Vumpuses are lorpuses. Sam is a vumpus. Sam is a rompus. True or false: Sam is not fast.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          2,
+          3,
+          4,
+          5
+        ],
+        "ranks": [
+          5,
+          0,
+          2,
+          7,
+          8
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              "###",
+              "T",
+              "W",
+              ".",
+              "G",
+              " True",
+              "y",
+              "uses",
+              "S",
+              "Sh"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " false",
+              " not",
+              "false",
+              " a",
+              "T",
+              "W",
+              "hidden",
+              "eff"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " not",
+              ".",
+              " or",
+              " a",
+              "y",
+              "ter",
+              "\n",
+              " t"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " not",
+              "###",
+              " True",
+              " False",
+              " a",
+              " g",
+              " or",
+              " liquid",
+              " t",
+              "."
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 7,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " a",
+              " not",
+              " g",
+              " small",
+              " over",
+              " True",
+              " t",
+              " large"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 8,
+            "top_k_tokens": [
+              " False",
+              " false",
+              " not",
+              " g",
+              "###",
+              " small",
+              " t",
+              " a",
+              " True",
+              " over"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " False",
+              " g",
+              " not",
+              " false",
+              " small",
+              " a",
+              " t",
+              " over",
+              "###",
+              " imp"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 4,
+      "question": "Every yumpus is a gorpus. Each gorpus is windy. Gorpuses are sterpuses. Sterpuses are mean. Each vumpus is not muffled. Sterpuses are shumpuses. Each shumpus is a zumpus. Numpuses are yumpuses. Shumpuses are lorpuses. Jompuses are fruity. Shumpuses are not cold. Every sterpus is a vumpus. Each brimpus is a dumpus. Each wumpus is not large. Each zumpus is dull. Every brimpus is opaque. Every yumpus is fast. Yumpuses are wumpuses. Numpuses are bitter. Gorpuses are lempuses. Each numpus is a jompus. Lempuses are happy. Every impus is cold. Sam is a numpus. Sam is a brimpus. True or false: Sam is not cold.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          6,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 4,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 6,
+            "top_k_tokens": [
+              "###",
+              "Sh",
+              ".",
+              "W",
+              "S",
+              "y",
+              " True",
+              "p",
+              "uses",
+              "G"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              "S",
+              "<|endoftext|>",
+              "p",
+              "led",
+              "W",
+              " g",
+              " a"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              "###",
+              " g",
+              " a",
+              "<|endoftext|>",
+              " G",
+              " t",
+              ".",
+              " nervous"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " g",
+              " G",
+              "###",
+              "<|endoftext|>",
+              " a",
+              " D",
+              " V",
+              " nervous"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " G",
+              " g",
+              "###",
+              "<|endoftext|>",
+              " D",
+              " V",
+              " a",
+              " Y"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " G",
+              " g",
+              "###",
+              "<|endoftext|>",
+              " D",
+              " V",
+              " a",
+              " Y"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " False",
+              " True",
+              " G",
+              " g",
+              "###",
+              "<|endoftext|>",
+              " D",
+              " V",
+              " a",
+              " Y"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 5,
+      "question": "Wumpuses are not orange. Grimpuses are lorpuses. Impuses are happy. Gorpuses are spicy. Each shumpus is not overcast. Every tumpus is a jompus. Yumpuses are not slow. Each vumpus is dull. Each lorpus is transparent. Numpuses are metallic. Numpuses are gorpuses. Vumpuses are shumpuses. Every grimpus is a tumpus. Wumpuses are rompuses. Each tumpus is a lempus. Vumpuses are grimpuses. Each numpus is a vumpus. Grimpuses are muffled. Lempuses are floral. Each sterpus is mean. Sterpuses are impuses. Tumpuses are slow. Each sterpus is a numpus. Rex is a sterpus. Rex is a wumpus. True or false: Rex is slow.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              "T",
+              "led",
+              "<|start-latent|>",
+              "uses",
+              "<|end-latent|>",
+              "ump",
+              "L",
+              "Max"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              "T",
+              "S",
+              "led",
+              "us",
+              ".",
+              "blind",
+              "ant"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              "S",
+              "T",
+              "Ch",
+              "us",
+              "<|endoftext|>",
+              ".",
+              " small"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              " a",
+              " n",
+              "<|endoftext|>",
+              "S",
+              "us",
+              ".",
+              "Ch"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " False",
+              " a",
+              " n",
+              " not",
+              "<|endoftext|>",
+              ".",
+              " discord",
+              " small"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " False",
+              " a",
+              " n",
+              " not",
+              " discord",
+              "<|endoftext|>",
+              " small",
+              "."
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " False",
+              " a",
+              " n",
+              " not",
+              " discord",
+              " small",
+              "<|endoftext|>",
+              "."
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 6,
+      "question": "Each wumpus is a lempus. Brimpuses are not fast. Lempuses are numpuses. Each jompus is hot. Numpuses are spicy. Tumpuses are not small. Impuses are zumpuses. Grimpuses are not loud. Every jompus is a vumpus. Each brimpus is a yumpus. Numpuses are tumpuses. Each lempus is overcast. Every dumpus is not floral. Each zumpus is happy. Each lorpus is not opaque. Impuses are rompuses. Wumpuses are amenable. Every numpus is an impus. Each wumpus is a lorpus. Every vumpus is bright. Each impus is loud. Every jompus is a wumpus. Every lempus is a dumpus. Fae is a brimpus. Fae is a jompus. True or false: Fae is not loud.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          3,
+          5
+        ],
+        "ranks": [
+          1,
+          3,
+          3
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "<|start-latent|>",
+              "N",
+              ".",
+              "<|end-latent|>",
+              "led",
+              "W",
+              "uses",
+              "p"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " loud",
+              "###",
+              "high",
+              "jam",
+              "alert",
+              "Buzz",
+              " voices",
+              "frequency",
+              "hall",
+              "weet"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " are",
+              " not",
+              " an",
+              " or",
+              ":"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " loud",
+              " True",
+              "###",
+              " False",
+              " am",
+              " false",
+              " bright",
+              " transparent",
+              " w",
+              " discord"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " not",
+              " are",
+              " an",
+              "y",
+              " or"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " loud",
+              " True",
+              "###",
+              " False",
+              " am",
+              " false",
+              " bright",
+              " transparent",
+              " discord",
+              " voices"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " a",
+              ".",
+              "\n",
+              " is",
+              "<|endoftext|>",
+              " not",
+              " are",
+              " an",
+              "y",
+              " or"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 7,
+      "question": "Numpuses are sweet. Every zumpus is not large. Tumpuses are floral. Every sterpus is luminous. Every impus is bright. Yumpuses are not melodic. Jompuses are transparent. Each lempus is a numpus. Each jompus is a shumpus. Rompuses are brown. Lempuses are melodic. Every shumpus is a lempus. Every gorpus is not slow. Every lempus is a wumpus. Rompuses are dumpuses. Every dumpus is a jompus. Every jompus is a zumpus. Every shumpus is aggressive. Each sterpus is a brimpus. Each shumpus is an impus. Dumpuses are gorpuses. Dumpuses are shy. Every rompus is a tumpus. Rex is a sterpus. Rex is a rompus. True or false: Rex is melodic.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          4,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 5,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 4,
+            "top_k_tokens": [
+              "###",
+              "<|start-latent|>",
+              "<|end-latent|>",
+              "led",
+              " True",
+              "uses",
+              "L",
+              "W",
+              "ump",
+              "Alex"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              " le",
+              " j",
+              "J",
+              ".",
+              "us",
+              " J",
+              "S"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " j",
+              " False",
+              " J",
+              " le",
+              " shy",
+              "J",
+              " a",
+              "."
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " j",
+              " True",
+              " J",
+              " False",
+              " le",
+              " shy",
+              " a",
+              " am",
+              " nervous"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " j",
+              " J",
+              " False",
+              " le",
+              " a",
+              " am",
+              " nervous",
+              " shy"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " j",
+              " False",
+              " J",
+              " le",
+              " a",
+              " am",
+              " nervous",
+              "."
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " j",
+              " False",
+              " J",
+              " le",
+              " a",
+              " am",
+              " nervous",
+              "."
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 8,
+      "question": "Each dumpus is a brimpus. Zumpuses are earthy. Each vumpus is not transparent. Every shumpus is large. Gorpuses are numpuses. Every dumpus is a zumpus. Each shumpus is a dumpus. Wumpuses are gorpuses. Gorpuses are vumpuses. Tumpuses are brown. Wumpuses are kind. Vumpuses are shumpuses. Every dumpus is slow. Grimpuses are nervous. Each sterpus is sour. Every rompus is a yumpus. Numpuses are overcast. Gorpuses are not bright. Each lempus is not slow. Each shumpus is a grimpus. Rompuses are melodic. Wumpuses are sterpuses. Vumpuses are tumpuses. Max is a wumpus. Max is a rompus. True or false: Max is not slow.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "led",
+              "imp",
+              ".",
+              "y",
+              "W",
+              "p",
+              "uses",
+              "S"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              "slow",
+              "low",
+              "Slow",
+              "Low",
+              "us",
+              "delay",
+              "y"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " slow",
+              "low",
+              "Slow",
+              " not",
+              "slow",
+              "Low",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " True",
+              " slow",
+              " not",
+              "low",
+              " delayed",
+              "<|endoftext|>",
+              " small",
+              " dump"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " slow",
+              " not",
+              " dump",
+              "<|endoftext|>",
+              " over",
+              " D",
+              " small"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " dump",
+              " True",
+              " not",
+              " slow",
+              " D",
+              " over",
+              " a",
+              " hospitalized"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " dump",
+              " True",
+              " D",
+              " not",
+              " slow",
+              " over",
+              " a",
+              " hospitalized"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 9,
+      "question": "Every wumpus is not temperate. Vumpuses are floral. Tumpuses are sunny. Sterpuses are dumpuses. Every shumpus is a jompus. Impuses are wooden. Sterpuses are zumpuses. Each jompus is a sterpus. Each shumpus is a brimpus. Each numpus is a tumpus. Numpuses are orange. Each brimpus is small. Shumpuses are shy. Each vumpus is a shumpus. Yumpuses are not loud. Each vumpus is a lorpus. Each numpus is a vumpus. Each zumpus is not angry. Every lorpus is fast. Sterpuses are loud. Each jompus is not spicy. Jompuses are wumpuses. Impuses are grimpuses. Sally is an impus. Sally is a numpus. True or false: Sally is loud.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          5,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              "###",
+              "<|start-latent|>",
+              "<|end-latent|>",
+              "W",
+              "S",
+              " True",
+              "led",
+              "Sam",
+              "uses",
+              "."
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              "L",
+              "S",
+              "led",
+              "Scient",
+              "W",
+              ".",
+              "p"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " False",
+              "led",
+              "L",
+              " loud",
+              "Scient",
+              ".",
+              "S",
+              "aston"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              "###",
+              " False",
+              " loud",
+              "led",
+              "aston",
+              "Scient",
+              ".",
+              " small",
+              "L"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              " False",
+              "###",
+              " a",
+              " not",
+              " small",
+              " z",
+              ".",
+              " Stanford",
+              " loud"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              " False",
+              " small",
+              " loud",
+              "###",
+              " not",
+              " a",
+              " L",
+              " Stanford",
+              " am"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " True",
+              " False",
+              "###",
+              " small",
+              " not",
+              " a",
+              " loud",
+              " am",
+              " L",
+              "."
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 10,
+      "question": "Zumpuses are not metallic. Gorpuses are dumpuses. Each lorpus is a zumpus. Each lempus is sunny. Numpuses are cold. Every numpus is a jompus. Lorpuses are large. Each shumpus is a rompus. Zumpuses are lempuses. Shumpuses are lorpuses. Every vumpus is a gorpus. Each sterpus is nervous. Rompuses are floral. Every tumpus is loud. Every grimpus is opaque. Gorpuses are tumpuses. Gorpuses are not nervous. Zumpuses are vumpuses. Every shumpus is sweet. Each vumpus is slow. Every impus is mean. Every vumpus is an impus. Each lorpus is a grimpus. Stella is a shumpus. Stella is a numpus. True or false: Stella is not nervous.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          7,
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 7,
+            "top_k_tokens": [
+              "###",
+              "W",
+              "Z",
+              ".",
+              "L",
+              "G",
+              "y",
+              " True",
+              "us",
+              "uses"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " false",
+              " True",
+              " a",
+              " not",
+              "W",
+              " researchers",
+              "eff",
+              "False"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              ".",
+              " not",
+              " a",
+              " or",
+              "y",
+              " False",
+              ":",
+              "\n"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " not",
+              ".",
+              " a",
+              " or",
+              " False",
+              "\n",
+              " is",
+              "y"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " not",
+              ".",
+              " a",
+              " False",
+              " or",
+              " false",
+              "\n",
+              "y"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              ".",
+              " not",
+              " a",
+              " or",
+              ":",
+              "\n",
+              " is",
+              " False"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " not",
+              ".",
+              " a",
+              " False",
+              " or",
+              " false",
+              "y",
+              " is"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 11,
+      "question": "Each brimpus is a zumpus. Each numpus is a grimpus. Gorpuses are lempuses. Every vumpus is blue. Every yumpus is not transparent. Every gorpus is a numpus. Each vumpus is a yumpus. Jompuses are vumpuses. Brimpuses are gorpuses. Every jompus is overcast. Each impus is slow. Lempuses are liquid. Rompuses are not dull. Every jompus is a lorpus. Every grimpus is bitter. Each zumpus is temperate. Every vumpus is a brimpus. Gorpuses are small. Lorpuses are floral. Numpuses are not slow. Each brimpus is not mean. Each rompus is a sterpus. Numpuses are dumpuses. Sally is a jompus. Sally is a rompus. True or false: Sally is not slow.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          4,
+          4,
+          6,
+          5,
+          5,
+          5,
+          5
+        ],
+        "rank_stable_position": 4,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 4,
+            "top_k_tokens": [
+              "###",
+              "W",
+              ".",
+              "uses",
+              " True",
+              "us",
+              "y",
+              "G",
+              "p",
+              "S"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 4,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              "W",
+              " True",
+              "S",
+              "N",
+              ".",
+              "none",
+              " n"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 6,
+            "top_k_tokens": [
+              " False",
+              " not",
+              "###",
+              " small",
+              " n",
+              " false",
+              " True",
+              " a",
+              " t",
+              " w"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              " False",
+              " not",
+              " small",
+              " n",
+              " false",
+              " True",
+              "###",
+              " t",
+              " w",
+              " a"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              " False",
+              " not",
+              " small",
+              "###",
+              " n",
+              " True",
+              " false",
+              " t",
+              " a",
+              " w"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              " False",
+              " not",
+              " small",
+              "###",
+              " n",
+              " True",
+              " false",
+              " t",
+              " a",
+              " w"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              " False",
+              " not",
+              " small",
+              "###",
+              " n",
+              " True",
+              " false",
+              " t",
+              " a",
+              " w"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 12,
+      "question": "Each zumpus is feisty. Each vumpus is an impus. Vumpuses are bright. Each wumpus is not muffled. Yumpuses are numpuses. Each gorpus is not moderate. Each zumpus is a sterpus. Each lorpus is not red. Each dumpus is spicy. Every numpus is sunny. Each zumpus is a lorpus. Wumpuses are gorpuses. Every yumpus is a shumpus. Jompuses are dumpuses. Shumpuses are brimpuses. Grimpuses are not feisty. Jompuses are yumpuses. Every wumpus is a jompus. Each jompus is liquid. Each yumpus is large. Each shumpus is not opaque. Brimpuses are temperate. Shumpuses are zumpuses. Polly is a wumpus. Polly is a vumpus. True or false: Polly is feisty.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "rank_stable_position": 4,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              "<|start-latent|>",
+              "<|end-latent|>",
+              "W",
+              "uses",
+              "ump",
+              "y",
+              "S",
+              "led"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " z",
+              ".",
+              "us",
+              "S",
+              "<|endoftext|>",
+              "uses"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " z",
+              " Z",
+              ".",
+              " t",
+              " a",
+              "us"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " z",
+              " Z",
+              ".",
+              " t",
+              " a",
+              " earth"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              " not",
+              "###",
+              " True",
+              " z",
+              " Z",
+              " t",
+              " a",
+              ".",
+              " earth"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              " not",
+              "###",
+              " True",
+              " z",
+              " Z",
+              " t",
+              " a",
+              ".",
+              " earth"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              " False",
+              " not",
+              "###",
+              " True",
+              " z",
+              " Z",
+              " t",
+              " a",
+              ".",
+              " earth"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 13,
+      "question": "Every rompus is a tumpus. Wumpuses are sterpuses. Every tumpus is a yumpus. Lorpuses are brimpuses. Shumpuses are vumpuses. Every shumpus is not blue. Gorpuses are not bright. Each tumpus is a grimpus. Dumpuses are not loud. Each vumpus is not floral. Lempuses are not metallic. Shumpuses are wumpuses. Yumpuses are shumpuses. Each grimpus is opaque. Rompuses are temperate. Every tumpus is not amenable. Each impus is not moderate. Each wumpus is metallic. Yumpuses are gorpuses. Yumpuses are not feisty. Lorpuses are not windy. Each wumpus is an impus. Every rompus is a dumpus. Sally is a rompus. Sally is a lorpus. True or false: Sally is not metallic.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "ranks": [
+          3,
+          3,
+          1,
+          2,
+          2
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              "###",
+              "y",
+              "W",
+              " False",
+              "led",
+              "p",
+              ".",
+              "<|start-latent|>",
+              "ant",
+              "T"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 3,
+            "top_k_tokens": [
+              "###",
+              " not",
+              " True",
+              " False",
+              "ter",
+              ".",
+              "T",
+              "us",
+              "not",
+              "led"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " a",
+              "<|endoftext|>",
+              " is",
+              ".",
+              " are",
+              " t"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " not",
+              " True",
+              " False",
+              "###",
+              " small",
+              " transparent",
+              " a",
+              ".",
+              " metallic",
+              " t"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " a",
+              ".",
+              "\n",
+              " is",
+              " not",
+              "<|endoftext|>",
+              " are",
+              " an",
+              " or",
+              " D"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " not",
+              " True",
+              " False",
+              "###",
+              " small",
+              " a",
+              " t",
+              " transparent",
+              " z",
+              " false"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              " a",
+              ".",
+              " is",
+              "\n",
+              " not",
+              "<|endoftext|>",
+              " are",
+              " an",
+              " or",
+              " D"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 14,
+      "question": "Tumpuses are vumpuses. Tumpuses are dull. Each yumpus is a wumpus. Vumpuses are gorpuses. Numpuses are sterpuses. Dumpuses are fruity. Each jompus is large. Rompuses are bitter. Each vumpus is a grimpus. Every grimpus is not moderate. Impuses are tumpuses. Wumpuses are happy. Each yumpus is an impus. Tumpuses are dumpuses. Each vumpus is not large. Zumpuses are orange. Lempuses are not snowy. Impuses are zumpuses. Impuses are not metallic. Every numpus is cold. Lempuses are yumpuses. Every yumpus is aggressive. Lempuses are rompuses. Alex is a lempus. Alex is a numpus. True or false: Alex is large.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "ranks": [
+          9,
+          1,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 9,
+            "top_k_tokens": [
+              "###",
+              "V",
+              "W",
+              "T",
+              "Y",
+              "Sh",
+              "L",
+              "Z",
+              "Imp",
+              " False"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "y",
+              "T",
+              "Y",
+              "W",
+              "dro",
+              "not",
+              "none",
+              "V"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "<|endoftext|>",
+              " True",
+              ".",
+              "W",
+              " not",
+              "S",
+              " is",
+              " a"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " false",
+              " True",
+              "None",
+              "not",
+              "0",
+              "T",
+              "W"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              "###",
+              "<|endoftext|>",
+              " is",
+              "\n",
+              " not",
+              " are",
+              " True",
+              ":"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " false",
+              " True",
+              " t",
+              " disapproval",
+              " a",
+              " y",
+              " w"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": false,
+            "rank": null,
+            "top_k_tokens": [
+              ".",
+              " a",
+              " is",
+              "\n",
+              "<|endoftext|>",
+              " not",
+              " are",
+              "###",
+              " an",
+              ":"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 15,
+      "question": "Every wumpus is large. Each lempus is a grimpus. Yumpuses are not floral. Brimpuses are gorpuses. Every brimpus is a shumpus. Sterpuses are impuses. Every vumpus is a dumpus. Every lempus is a yumpus. Every gorpus is a sterpus. Gorpuses are wumpuses. Zumpuses are numpuses. Each brimpus is bitter. Gorpuses are not feisty. Every sterpus is not opaque. Every zumpus is dull. Rompuses are not slow. Vumpuses are brimpuses. Dumpuses are rainy. Each shumpus is not orange. Every impus is luminous. Vumpuses are aggressive. Every lempus is slow. Sterpuses are lempuses. Stella is a zumpus. Stella is a vumpus. True or false: Stella is not slow.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          1,
+          2,
+          1,
+          0,
+          0,
+          1
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "led",
+              ".",
+              "y",
+              "p",
+              "tun",
+              "ant",
+              "W",
+              "uses"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              "blind",
+              "stro",
+              "sleep",
+              " slow",
+              "journal",
+              "chall",
+              "CDC"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              " slow",
+              " small",
+              " am",
+              " transparent",
+              " a",
+              " whistleblowers",
+              " blue"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " True",
+              " False",
+              "###",
+              " slow",
+              " small",
+              " am",
+              " transparent",
+              " le",
+              " not",
+              " z"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              " True",
+              "###",
+              " slow",
+              " small",
+              " le",
+              " am",
+              " transparent",
+              " not",
+              " bright"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " True",
+              " slow",
+              " small",
+              " le",
+              " am",
+              " transparent",
+              " not",
+              " bright"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              " True",
+              " False",
+              "###",
+              " slow",
+              " transparent",
+              " am",
+              " not",
+              " small",
+              " a",
+              " le"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 16,
+      "question": "Each yumpus is a grimpus. Yumpuses are gorpuses. Jompuses are brimpuses. Each grimpus is a dumpus. Zumpuses are earthy. Every lorpus is a jompus. Yumpuses are moderate. Lorpuses are wumpuses. Each jompus is a yumpus. Gorpuses are dull. Lorpuses are brown. Zumpuses are sterpuses. Each brimpus is transparent. Every sterpus is not amenable. Grimpuses are sour. Wumpuses are large. Jompuses are not loud. Every lempus is not earthy. Each shumpus is a rompus. Every grimpus is a zumpus. Shumpuses are not sunny. Dumpuses are nervous. Every zumpus is a numpus. Fae is a lorpus. Fae is a shumpus. True or false: Fae is earthy.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              "<|start-latent|>",
+              "uses",
+              "<|end-latent|>",
+              "ump",
+              "led",
+              "W",
+              "S",
+              "."
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              " False",
+              "y",
+              "us",
+              "S",
+              ".",
+              "uses",
+              "W",
+              "imp"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              ".",
+              " not",
+              "us",
+              "y",
+              " y",
+              " z",
+              "S"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " z",
+              " y",
+              ".",
+              " a",
+              " nervous",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " z",
+              " a",
+              " y",
+              ".",
+              " nervous",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " z",
+              " a",
+              " y",
+              ".",
+              " nervous",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " a",
+              " z",
+              ".",
+              " y",
+              "<|endoftext|>",
+              " nervous"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 17,
+      "question": "Every wumpus is a shumpus. Every sterpus is wooden. Each numpus is opaque. Shumpuses are tumpuses. Shumpuses are dumpuses. Every wumpus is a grimpus. Numpuses are sterpuses. Numpuses are wumpuses. Jompuses are vumpuses. Zumpuses are floral. Each gorpus is not dull. Every tumpus is an impus. Each jompus is a numpus. Brimpuses are not moderate. Each wumpus is not hot. Tumpuses are not floral. Jompuses are sweet. Dumpuses are red. Each shumpus is feisty. Each brimpus is a lempus. Every vumpus is rainy. Every grimpus is not mean. Tumpuses are gorpuses. Alex is a jompus. Alex is a brimpus. True or false: Alex is floral.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rank_stable_position": 4,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              "W",
+              " False",
+              "T",
+              "Sh",
+              "N",
+              "Y",
+              "S",
+              "Each",
+              "Z"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              "W",
+              " not",
+              " True",
+              "S",
+              "T",
+              "N",
+              "us",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " True",
+              " a",
+              "W",
+              " n",
+              "<|endoftext|>",
+              ".",
+              " t"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " a",
+              " small",
+              " t",
+              " n",
+              " w",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " a",
+              " small",
+              " t",
+              " n",
+              " w",
+              " g"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " a",
+              " small",
+              " t",
+              " n",
+              " w",
+              " g"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 0,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " not",
+              " True",
+              " a",
+              " small",
+              " t",
+              " n",
+              " w",
+              " g"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 18,
+      "question": "Each sterpus is not wooden. Each lempus is wooden. Each impus is a rompus. Tumpuses are shumpuses. Dumpuses are cold. Shumpuses are feisty. Numpuses are lorpuses. Each impus is small. Lempuses are wumpuses. Lempuses are gorpuses. Every gorpus is snowy. Impuses are grimpuses. Every tumpus is red. Every tumpus is an impus. Numpuses are melodic. Each grimpus is not sweet. Every rompus is a yumpus. Every vumpus is a dumpus. Yumpuses are not slow. Each vumpus is opaque. Rompuses are vumpuses. Vumpuses are lempuses. Every rompus is bright. Sally is a tumpus. Sally is a numpus. True or false: Sally is not wooden.\n",
+      "final_answer": "False",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "False",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "False",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 5,
+            "top_k_tokens": [
+              "###",
+              "led",
+              "<|start-latent|>",
+              "p",
+              ".",
+              " False",
+              "<|end-latent|>",
+              "W",
+              "ant",
+              "y"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " le",
+              ".",
+              " is",
+              "ve",
+              "p",
+              "y"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " le",
+              ".",
+              " is",
+              "<|endoftext|>",
+              " a",
+              "y"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " True",
+              " le",
+              ".",
+              " a",
+              " is",
+              " v",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " True",
+              " le",
+              ".",
+              " a",
+              " is",
+              " v",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " not",
+              " True",
+              " le",
+              ".",
+              " a",
+              " is",
+              " v",
+              "<|endoftext|>"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " not",
+              " le",
+              ".",
+              " a",
+              " is",
+              " v",
+              "<|endoftext|>"
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    },
+    {
+      "sample_idx": 19,
+      "question": "Each gorpus is red. Brimpuses are floral. Each shumpus is a lorpus. Grimpuses are bright. Sterpuses are small. Rompuses are discordant. Gorpuses are impuses. Brimpuses are gorpuses. Zumpuses are transparent. Sterpuses are vumpuses. Every rompus is a dumpus. Zumpuses are lempuses. Each impus is not angry. Sterpuses are brimpuses. Tumpuses are not discordant. Every lempus is moderate. Shumpuses are wooden. Brimpuses are grimpuses. Every yumpus is sour. Rompuses are yumpuses. Every gorpus is a zumpus. Each vumpus is overcast. Each zumpus is a rompus. Stella is a sterpus. Stella is a shumpus. True or false: Stella is discordant.\n",
+      "final_answer": "True",
+      "num_reasoning_tokens": 6,
+      "early_stopping_results": [
+        {
+          "num_reasoning_tokens": 0,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 1,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 2,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 3,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 4,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 5,
+          "answer": "True",
+          "matches_final": true
+        },
+        {
+          "num_reasoning_tokens": 6,
+          "answer": "True",
+          "matches_final": true
+        }
+      ],
+      "num_reasoning_tokens_first_match": 0,
+      "num_reasoning_tokens_stable_match": 0,
+      "vocab_projection_by_token": {
+        "first_position_answer_in_top_k": 0,
+        "positions_with_answer": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "ranks": [
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "rank_stable_position": 6,
+        "num_reasoning_positions": 7,
+        "results_by_position": [
+          {
+            "position": 0,
+            "answer_in_top_k": true,
+            "rank": 1,
+            "top_k_tokens": [
+              "###",
+              " True",
+              "uses",
+              "<|start-latent|>",
+              "W",
+              "<|end-latent|>",
+              "led",
+              "S",
+              ".",
+              "ump"
+            ]
+          },
+          {
+            "position": 1,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " r",
+              "R",
+              "S",
+              ".",
+              "p",
+              "<|endoftext|>",
+              "dec"
+            ]
+          },
+          {
+            "position": 2,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " r",
+              "dec",
+              "<|endoftext|>",
+              " discord",
+              "against",
+              "vict",
+              "y"
+            ]
+          },
+          {
+            "position": 3,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " r",
+              " discord",
+              " y",
+              " moderate",
+              "dec",
+              "<|endoftext|>",
+              "votes"
+            ]
+          },
+          {
+            "position": 4,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              " False",
+              "###",
+              " True",
+              " r",
+              " discord",
+              " moderate",
+              " y",
+              "<|endoftext|>",
+              "dec",
+              "votes"
+            ]
+          },
+          {
+            "position": 5,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " r",
+              " discord",
+              " moderate",
+              "<|endoftext|>",
+              " y",
+              "votes",
+              " bitter"
+            ]
+          },
+          {
+            "position": 6,
+            "answer_in_top_k": true,
+            "rank": 2,
+            "top_k_tokens": [
+              "###",
+              " False",
+              " True",
+              " r",
+              " discord",
+              "<|endoftext|>",
+              " moderate",
+              " y",
+              " bitter",
+              "."
+            ]
+          }
+        ]
+      },
+      "vocab_projection_by_step": null
+    }
+  ],
+  "summary": {
+    "early_stopping": {
+      "total_samples": 20,
+      "avg_reasoning_tokens": 6.0,
+      "avg_num_reasoning_tokens_first_match": 0.0,
+      "avg_num_reasoning_tokens_stable_match": 0.0,
+      "num_with_first_match": 20,
+      "num_with_stable_match": 20
+    },
+    "vocab_projection_by_token": {
+      "total_samples": 20,
+      "avg_first_position_answer_in_top_k": 0.0,
+      "avg_rank_stable_position": 5.5,
+      "num_with_answer_in_top_k": 20
+    },
+    "vocab_projection_by_step": {},
+    "accuracy_by_iteration": null,
+    "skip_diagnostics": {
+      "total_samples_attempted": 20,
+      "num_processed": 20,
+      "num_skipped_early_stop": 0,
+      "num_skipped_vocab_projection": 0,
+      "early_stop_skip_rate": 0.0,
+      "vocab_projection_skip_rate": 0.0
+    }
+  }
+}
