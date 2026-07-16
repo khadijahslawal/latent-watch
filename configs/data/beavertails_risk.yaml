@@ -1,0 +1,25 @@
+dataset:
+  source: "PKU-Alignment/BeaverTails"
+  split: "330k_train"
+
+sampling:
+  train_size: 5000
+  val_size: 500
+  test_size: 1000
+  # Target balance within train set
+  high_risk_fraction: 0.5
+  # Max examples per harm category in HIGH_RISK before global balance step
+  per_category_cap: 400
+  random_seed: 42
+
+splits:
+  # Fractions applied to unique-prompt pool before pilot downsampling
+  train_frac: 0.80
+  val_frac: 0.10
+  test_frac: 0.10
+  stratify_on: "label"
+
+output:
+  interim_dir: "data/interim"
+  processed_dir: "data/processed/beavertails_risk_v1"
+  version: "v1"
