@@ -1,1 +1,39 @@
-.latent-watch-venv
+.latent-watch-venv/
+.venv/
+__pycache__
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+.env
+
+# Data
+data/raw/
+data/interim/
+data/processed/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.key
+openai_key.txt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Weights & checkpoints — large files go to Drive/S3
+checkpoints/
+outputs/runs/
+wandb/
