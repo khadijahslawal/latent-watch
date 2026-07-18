@@ -26,7 +26,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, get_cosine_schedule_with_warmup
 from sklearn.metrics import f1_score
 
-from latent_watch.training.lora_utils import save_adapter, save_adapter_with_tokenizer
+from training.lora_utils import save_adapter, save_adapter_with_tokenizer
 
 
 # ── Dataset ───────────────────────────────────────────────────────────────

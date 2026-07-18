@@ -28,7 +28,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
-from latent_watch.training.formatters import format_coconut_stage
+from training.formatters import format_coconut_stage
 
 
 # ── COCONUT Wrapper ───────────────────────────────────────────────────────

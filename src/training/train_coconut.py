@@ -32,13 +32,13 @@ from torch.utils.data import DataLoader
 from transformers import get_cosine_schedule_with_warmup
 from sklearn.metrics import f1_score
 
-from latent_watch.training.coconut import (
+from training.coconut import (
     BOT_TOKEN,
     CoconutCurriculumDataset,
     CoconutWrapper,
     add_coconut_tokens,
 )
-from latent_watch.training.lora_utils import (
+from training.lora_utils import (
     attach_lora,
     load_base_model,
     save_adapter_with_tokenizer,

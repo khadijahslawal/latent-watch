@@ -21,9 +21,9 @@ from typing import Any
 
 import yaml
 
-from latent_watch.training.base_trainer import PromptRiskDataset, train
-from latent_watch.training.formatters import format_cot
-from latent_watch.training.lora_utils import attach_lora, load_base_model
+from training.base_trainer import PromptRiskDataset, train
+from training.formatters import format_cot
+from training.lora_utils import attach_lora, load_base_model
 
 
 def _load_jsonl(path: str | Path) -> list[dict[str, Any]]:

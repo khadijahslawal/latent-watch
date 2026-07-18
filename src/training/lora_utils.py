@@ -56,7 +56,7 @@ def load_base_model(
         model_name,
         quantization_config=bnb_config,
         device_map="auto",
-        torch_dtype=compute_dtype if not load_in_4bit else None,
+        dtype=compute_dtype if not load_in_4bit else None,
     )
     model.config.use_cache = False  # required for gradient checkpointing
 

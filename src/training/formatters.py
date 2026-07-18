@@ -35,13 +35,15 @@ USER_PROMPT_TEMPLATE = (
 def format_answer_only(row: dict[str, Any]) -> tuple[str, str]:
     """Format a row for answer-only training (E1).
 
-    Target is the label string only. Loss computed on this token only.
+    Reads from answer_only/ JSONL rows, which use a messages format:
+      messages[0]["content"] = pre-formatted user prompt
+      messages[1]["content"] = label string (HIGH_RISK or LOW_RISK)
 
     Returns:
         (input_text, target_text)
     """
-    input_text = USER_PROMPT_TEMPLATE.format(prompt=row["prompt"])
-    target_text = row["label"]  # "HIGH_RISK" or "LOW_RISK"
+    input_text  = row["messages"][0]["content"]
+    target_text = row["messages"][1]["content"]  # "HIGH_RISK" or "LOW_RISK"
     return input_text, target_text
 
 
@@ -50,19 +52,17 @@ def format_answer_only(row: dict[str, Any]) -> tuple[str, str]:
 def format_cot(row: dict[str, Any]) -> tuple[str, str]:
     """Format a row for CoT training (E2).
 
-    Target includes <reasoning> block + <answer> tag.
-    Loss computed on full target (reasoning + answer tokens).
+    Reads from cot/ JSONL rows, which use a messages format:
+      messages[0]["content"] = pre-formatted user prompt
+      messages[1]["content"] = <reasoning>...</reasoning>\n<answer>LABEL</answer>
+
+    Loss is computed on the full target (reasoning + answer tokens).
 
     Returns:
         (input_text, target_text)
     """
-    input_text = USER_PROMPT_TEMPLATE.format(prompt=row["prompt"])
-    reasoning_steps = row["reasoning"]  # list of 3 strings
-    reasoning_text = "\n".join(reasoning_steps)
-    target_text = (
-        f"<reasoning>\n{reasoning_text}\n</reasoning>\n"
-        f"<answer>{row['label']}</answer>"
-    )
+    input_text  = row["messages"][0]["content"]
+    target_text = row["messages"][1]["content"]
     return input_text, target_text
 
 
@@ -76,15 +76,16 @@ def format_coconut_stage(
 ) -> tuple[str, str]:
     """Format a row for a specific COCONUT curriculum stage (E3).
 
-    Stage 0: full CoT target (identical to E2).
+    Reads from cot/ JSONL rows (same files as E2). Extracts the pre-formatted
+    user prompt from messages[0]["content"] and reconstructs the target by
+    progressively replacing reasoning sentences with <bot> tokens.
+
+    Stage 0: full CoT target (identical to E2 — reads messages[1] directly).
     Stage k>0: first k reasoning sentences replaced by k <bot> tokens.
     Stage == num_stages (final): all reasoning replaced, only <answer> remains.
 
-    The continuous thought tokens (<bot>) are not supervised — loss masking
-    in the trainer handles this by setting their labels to -100.
-
     Args:
-        row: JSONL row with reasoning list and label.
+        row: cot/ JSONL row with messages and label fields.
         stage: Current curriculum stage (0-indexed).
         num_stages: Total number of stages C (pilot: 3).
         bot_token: Special token string for latent thought.
@@ -92,9 +93,18 @@ def format_coconut_stage(
     Returns:
         (input_text, target_text)
     """
-    input_text = USER_PROMPT_TEMPLATE.format(prompt=row["prompt"])
-    reasoning_steps: list[str] = row["reasoning"]  # 3 strings
+    input_text = row["messages"][0]["content"]
     label: str = row["label"]
+
+    # Extract reasoning steps from the pre-formatted assistant message
+    # Format: "<reasoning>\nstep1\nstep2\nstep3\n</reasoning>\n<answer>LABEL</answer>"
+    import re
+    assistant_content = row["messages"][1]["content"]
+    reasoning_match = re.search(r"<reasoning>(.*?)</reasoning>", assistant_content, re.DOTALL)
+    if reasoning_match:
+        reasoning_steps = [s.strip() for s in reasoning_match.group(1).strip().split("\n") if s.strip()]
+    else:
+        reasoning_steps = []
 
     if stage == 0:
         # Identical to CoT
