@@ -112,6 +112,7 @@ def print_trainable_parameters(model) -> None:
     )
 
 
+
 def save_adapter(model, output_dir: str | Path) -> None:
     """Save only the LoRA adapter weights (not the base model).
 
@@ -121,9 +122,10 @@ def save_adapter(model, output_dir: str | Path) -> None:
     """
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    # Handle COCONUT wrapper: save the inner peft model
-    inner = getattr(model, "model", model)
-    inner.save_pretrained(str(out))
+    # For COCONUT wrapper, get the inner PEFT model
+    # For standard PEFT model, save directly
+    peft_model = getattr(model, "peft_model", model)
+    peft_model.save_pretrained(str(out))
     print(f"Adapter saved → {out}")
 
 

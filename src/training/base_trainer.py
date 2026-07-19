@@ -164,11 +164,11 @@ def evaluate_weighted_f1(
                 if len(valid) == 0:
                     y_true.append(-1)
                     continue
-                # The last token of target is the label (HIGH_RISK/LOW_RISK)
-                last_token = valid[-1].item()
-                if last_token == high_risk_id:
+                # Decode the full target sequence to extract label string
+                decoded_target = tokenizer.decode(valid, skip_special_tokens=True).strip()
+                if "HIGH_RISK" in decoded_target:
                     y_true.append(1)
-                elif last_token == low_risk_id:
+                elif "LOW_RISK" in decoded_target:
                     y_true.append(0)
                 else:
                     y_true.append(-1)
