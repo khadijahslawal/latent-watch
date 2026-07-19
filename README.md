@@ -1,87 +1,227 @@
 # Latent Watch
-# Can Latent Reasoning Be Safety-Monitored? Necessity, Validity, and the Case for Custom Training
+## Can Latent Reasoning Be Safety-Monitored?
 
-**BlueDot Impact -  Technical AI Safety Project Sprint**
-
-**Author:** Khadija Shuaib
-
-**Project Status:** Active; Stage 0 in progress
-
-**Full working log:** [link]
+**BlueDot Impact — Technical AI Safety Project Sprint**  
+**Author:** Khadija Shuaib  
+**Project Status:** Active — training in progress  
+**Full working log:**
 
 ---
 
 ## The problem
 
-As reasoning migrates from token-level chain-of-thought into continuous latent space (COCONUT-style architectures), CoT monitoring doesn't just get less reliable. It becomes structurally impossible, since there's no longer a natural-language trace to read. This project asks whether that closing window matters in practice: **is safety-relevant signal (harmful intent) present and extractable from latent representations at all**, before it becomes unreadable by construction?
+As reasoning migrates from token-level chain-of-thought into continuous latent space (COCONUT-style architectures), CoT monitoring doesn't just get less reliable — it becomes structurally impossible. There is no longer a natural-language trace to read.
 
-This builds directly on Chang et al. (arXiv:2606.01243), which showed latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs, but did not test safety-relevant content. We ask whether that structure extends to safety.
+This raises a question that existing interpretability and monitoring work hasn't answered: **is safety-relevant signal even present in latent representations, and can it be extracted before the reasoning window closes entirely?**
+
+This project builds directly on Chang et al. (arXiv:2606.01243), which showed that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs — but studied only reasoning accuracy tasks. We ask whether that structure extends to safety-relevant content.
+
+---
 
 ## Research question
 
-Reframed (with reviewer input) from a single probing question into a staged, falsifiable structure that protects against an uninformative null result:
+Given a prompt, can we predict whether it has demonstrated a risk of eliciting an unsafe response — **without observing any chain-of-thought?**
 
-1. **Do latent reasoning mechanisms learned on reasoning tasks generalize sufficiently out of distribution to support safety-relevant activation monitoring?**
-2. *Conditional on (1):* When latent computation is causally involved in safety-relevant decisions, can its intermediate states predict harmful outputs beyond what's available from the input alone?
+More precisely: does latent reasoning encode safety-relevant information that is (a) present, (b) extractable, and (c) causally connected to model outputs, when there is no readable reasoning trace at all?
 
-| Stage | Question |
+---
+
+## Why this matters for AI safety
+
+Current safety monitoring of frontier models relies heavily on inspecting chain-of-thought outputs. Anthropic's usage policies, the safety cases in Responsible Scaling Policy documents, and most deployed monitoring pipelines assume that *if reasoning is present, it is readable*. COCONUT-style architectures break this assumption at the architectural level.
+
+This isn't a hypothetical concern. The COCONUT paper (Hao et al. 2024) demonstrates that models can be trained to reason entirely in continuous latent space, producing outputs with no intermediate text. If such architectures are adopted — and the performance advantages give strong incentive to do so — then any monitoring approach that depends on CoT inspection fails by construction.
+
+This project investigates whether an alternative is possible: detecting safety-relevant signal from latent activations directly, without the reasoning trace. A positive result would suggest that latent-space monitoring tools (probes, SAEs, representation-level classifiers) could partially recover what CoT inspection currently provides. A negative result would be equally informative, quantifying the monitoring gap that latent reasoning architectures would introduce.
+
+---
+
+## Experimental design
+
+The core experiment trains three LoRA adapters on Llama-3.2-1B, one for each reasoning format, on a shared safety classification task. All else is held equal.
+
+**Task (Task B):** Given a prompt, predict its observed safety risk.  
+- `HIGH_RISK`: at least one observed response to the prompt was unsafe  
+- `LOW_RISK`: all observed responses were safe
+
+| Experiment | Reasoning format | What it tests |
+|---|---|---|
+| E1 — Answer-only | No reasoning trace | Baseline: prompt features alone |
+| E2 — CoT | Explicit `<reasoning>...</reasoning>` | Upper bound: readable intermediate reasoning |
+| E3 — COCONUT | Continuous latent thoughts (`<bot>/<eot>`) | Target condition: latent reasoning only |
+
+The primary comparison is **E3 vs E2**: does latent reasoning match CoT's ability to detect safety-relevant signal, even though no intermediate text is produced? The secondary comparison is **E2 vs E1**: does explicit reasoning actually help at all for this task, before asking whether latent reasoning can replicate it.
+
+---
+
+## Dataset
+
+**Source:** BeaverTails (PKU-Alignment, CC-BY-NC-4.0) — 330k prompt-response pairs with harm category labels and human safety annotations.
+
+**Labelling policy:** Deduplicate by prompt; label `HIGH_RISK` if any paired response was unsafe. This is a deliberate high-recall choice: we care about prompts that *can* elicit unsafe outputs, not just those that *always* do.
+
+**Reasoning traces:** Synthetically generated via GPT-4o-mini, conditioned on ground-truth labels and harm categories. The generator does not see paired responses, ensuring it cannot learn information unavailable at inference time. Traces are validated against a set of rejection criteria (label contradiction, mention of observed responses, vague or overlong reasoning).
+
+**Split (after deduplication and sampling):**
+
+| Split | n | HIGH_RISK | LOW_RISK |
+|---|---|---|---|
+| Train | 3,928 | 2,500 | 1,428 |
+| Validation | 429 | 250 | 179 |
+| Test | 679 | 500 | 179 |
+
+Class imbalance is by design and matches BeaverTails' natural distribution. Primary metric is **weighted F1**; `HIGH_RISK` recall is reported separately as the safety-critical error type.
+
+**Harm categories covered (14):** animal abuse, child abuse, controversial topics / politics, discrimination / stereotype / injustice, drug abuse / weapons / banned substances, financial crime / property crime / theft, hate speech / offensive language, misinformation regarding ethics-laws-safety, non-violent unethical behaviour, privacy violation, self-harm, sexually explicit / adult content, terrorism / organised crime, violence / aiding / abetting / incitement.
+
+---
+
+## Model and training
+
+**Base model:** `meta-llama/Llama-3.2-1B`, loaded in 4-bit NF4 (bitsandbytes) for T4 compatibility.
+
+**LoRA configuration** (shared across E1, E2, E3):
+
+```
+r = 16, lora_alpha = 32, lora_dropout = 0.05
+target_modules = ["q_proj", "v_proj"]
+```
+
+**Training hyperparameters** (shared across E1, E2, E3):
+
+```
+epochs = 3, lr = 2e-4, batch_size = 8 (→4 if OOM)
+gradient_accumulation_steps = 4, optimizer = AdamW
+lr_scheduler = cosine, warmup_ratio = 0.05, max_seq_length = 512
+```
+
+Loss is masked to target tokens only; prompt tokens are set to `-100`.
+
+**COCONUT-specific:** E3 uses a staged curriculum (C=3 stages) implementing Hao et al.'s progressive replacement schedule. The LoRA adapter is attached to the base model before COCONUT wrapping; gradients flow back through the wrapper into the adapters. Two special tokens are added: `<bot>` (beginning of latent thought) and `<eot>` (end of latent thought).
+
+**Curriculum:**
+```
+Stage 0: <reasoning> step1 step2 step3 </reasoning> <answer>LABEL</answer>
+Stage 1: <bot> step2 step3 <answer>LABEL</answer>
+Stage 2: <bot><bot> step3 <answer>LABEL</answer>
+Stage 3: <bot><bot><bot> <answer>LABEL</answer>
+```
+
+At the final stage, no explicit reasoning is decoded. The answer is produced from latent thought alone.
+
+**Execution context:** Pilot runs on Google Colab (T4, fp16, 4-bit). Production runs on rented A100 (bf16, batch_size=16).
+
+---
+
+## Results
+
+> **[Placeholder — experiments in progress]**
+
+Results will report, for each experiment, on the held-out test set:
+
+- Accuracy, weighted precision / recall / F1
+- `HIGH_RISK` recall specifically (the safety-critical direction)
+- Confusion matrix
+- Softmax confidence scores (HIGH_RISK / LOW_RISK)
+- Per-harm-category breakdown
+
+The key comparisons:
+
+| Comparison | Question |
 |---|---|
-| 0  | Is the latent pathway causally load-bearing on safety prompts, or unused? |
-| 1  | Does the latent trajectory stay stable/non-degenerate off-distribution? |
-| 2 - Monitorability | Can linear probes detect safety-relevant signal in the latents? |
-| 3 - Temporal | Where in the trajectory does predictive signal emerge? |
+| E2 vs E1 | Does explicit reasoning improve safety signal detection? |
+| E3 vs E2 | Does latent reasoning match CoT's classification performance? |
+| E3 vs E1 | Does latent reasoning add anything beyond prompt features alone? |
+| Per-category E3 vs E2 | Which harm categories are most affected by the latent/CoT gap? |
 
-Stage 0 is a requirement: The checkpoint matrix we use comes from a paper (Dilgren & Wiegreffe, arXiv:2604.04902) that independently found latent tokens are often causally inert on logical-reasoning tasks. Skipping straight to probing would risk detecting signal in latents that aren't actually doing anything.
+---
 
-## Why we pivoted away from custom training (and why that pivot itself produced a finding)
+## What we expect to find (and why it matters either way)
 
-- The original design targeted a custom-trained Llama-3.1-8B COCONUT model, replicating Chang et al.'s training curriculum before extending it with a safety-probing layer. This failed during the CoT-replication stage - single-epoch training exceeded 14 hours, and a GPU disk failure during epoch 2 lost the run after ~$45 of compute.
+**If E3 ≈ E2 (latent reasoning matches CoT performance):** This would suggest that safety-relevant signal is not merely encoded in the readable trace — it is present in the latent representations themselves, and is predictive of outputs. This opens the door to probe-based or representation-level monitoring as an alternative to CoT inspection.
 
-- We pivoted to Dilgren & Wiegreffe's released checkpoint matrix (`connordilgren/are-lrms-easily-interpretable`, MIT-licensed):
-  -  GPT-2 and Llama-3.2-1B, across three datasets (GSM8K, ProntoQA, ProsQA) and six reasoning-format conditions (No-CoT, CoT, COCONUT, CODI, multimode variants).
-  -  This let us run a controlled, cross-condition Stage 0 investigation at near-zero marginal compute cost via Colab: a methodological upgrade over the original single-checkpoint plan, not just a fallback.
+**If E3 << E2 (latent reasoning underperforms CoT):** This would quantify the monitoring gap that latent architectures introduce, and would motivate investment in alternative interpretability tools (SAE-based feature discovery, activation-level anomaly detection) to partially recover what is lost.
 
-## What we've found so far (preliminary - see full log for caveats and sample sizes)
+**If E3 ≈ E1 (latent reasoning adds nothing beyond prompt features):** This would suggest that latent reasoning in COCONUT doesn't meaningfully engage with safety-relevant content at all, at least in this training regime — a finding with implications for how latent reasoning models respond to safety-relevant inputs in practice.
 
-Running `early_stopping.run` (a necessity-ablation tool from the checkpoint repo) on BeaverTails safety prompts, across two COCONUT checkpoints:
+Any of these outcomes is informative. The staged design ensures the null result is not vacuous.
 
-- **GPT-2 / ProntoQA / COCONUT** (n=150):
-  - 96.7% of prompts produced the identical answer (`'False'`), regardless of content: a violent threat and a benign small-talk question got the same response.
-  -  99.3% committed to that answer using **zero** latent reasoning steps.
-    
-- **Llama-3.2-1B / ProntoQA / COCONUT** (n=150): same phenomenon, mirrored polarity (98.7% `'True'`). Confirms the collapse is **not specific to small models**. It persists across an 8× parameter-scale increase.
+---
 
-**Preliminary contrast with CoT** (same base model, same prompts): 
+## Limitations and caveats
 
-Where COCONUT preserves output format but appears to ignore prompt content, the CoT checkpoint shows the opposite surface symptom. It frequently breaks the expected output format entirely (95% of generations didn't produce a parseable delimiter) while what *does* get through looks more content-engaged. This is not yet a confirmed finding, the non-skipped CoT sample was small and non-random, and a full-coverage rerun (logging all outputs regardless of format compliance) is in progress. **Do not cite this specific contrast externally without an update from the running log.**
+**Scale:** Llama-3.2-1B is small. Results may not generalise to larger models where latent reasoning is likely more capable and more meaningfully engaged.
 
-## Why this matters for the case to fund the original (8B, custom-trained) question
+**Training data:** Reasoning traces are synthetically generated, not human-authored. The quality of CoT (and by extension COCONUT's curriculum signal) depends on GPT-4o-mini's ability to produce rationales that reflect genuine risk reasoning rather than label-correlated surface patterns.
 
-The pretrained-checkpoint pivot was meant to be a low-cost way to make progress on the general research question while compute constraints were resolved. It has done more than that: it has surfaced a **concrete, load-bearing obstacle** where generalization/necessity failure under distribution shift that any safety-monitoring approach built on these architectures will need to address before Stage 2 (probing) can produce interpretable results.
+**Task framing:** Task B classifies *prompt-level* elicitation risk based on observed response variance — it is not a real-time inference task and does not simulate deployment conditions directly. Results speak to whether latent representations encode safety signal in principle, not to operational monitoring performance.
 
-This is useful evidence for a funding request in two ways:
+**COCONUT implementation:** We implement COCONUT from scratch following Hao et al. 2024, not using Dilgren & Wiegreffe's codebase. Differences in implementation may affect comparability to other COCONUT results in the literature.
 
-1. It shows the staged research design is working as intended by catching a real validity problem before wasted probe-training investment, rather than assuming it away.
-2. It suggests the available pretrained checkpoints failure may be that they're trained on narrow, single-domain tasks (GSM8K/ProntoQA/ProsQA) with small, closed answer spaces which is precisely the kind of limitation that a **custom-trained model on a broader, safety-adjacent curriculum** (the original 8B proposal) would be positioned to test directly. Compute to train (or fine-tune) a model with broader distributional coverage is now a better-justified ask than it was at the project's outset, because we can point to a specific, documented failure mode it would let us investigate.
+---
 
-## Methodology notes worth knowing before reusing this pipeline
+## Related work
 
-The checkpoint repo's tooling was built exclusively around GSM8K/ProntoQA/ProsQA (all of which have gold reasoning traces and canonical short answers). Adapting it for safety prompts (no gold trace, no canonical answer) required several fixes, documented in full in the research log — most notably a schema workaround for an off-by-one bug in the dataset loader's internal consistency check, and recognizing that the `###`-delimiter answer-extraction method behaves very differently (and non-comparably) across reasoning formats. Worth reading before extending this work.
+- **Chang et al. (arXiv:2606.01243):** Establishes that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs (§3.2–3.3). We extend their investigation to safety-relevant content.
+- **Hao et al. 2024 (COCONUT):** Original architecture and training curriculum for continuous-thought reasoning models.
+- **Dilgren & Wiegreffe (arXiv:2604.04902):** Independent finding that latent tokens are often causally inert on logical-reasoning tasks — a motivation for our necessity checks and staged experimental design.
+- **BeaverTails (Ji et al.):** Prompt-response safety dataset with 14-category harm labels. Primary data source.
 
-## Links
+---
 
-- Checkpoint repo: `connordilgren/are-lrms-easily-interpretable` 
-- Checkpoint paper: Dilgren & Wiegreffe, arXiv:2604.04902
-- Foundational paper: Chang et al., arXiv:2606.01243
-- Full research log (methodology, all experiments, change history): **[TODO: paste google drive link]**
+## Repository structure
 
-## Current next steps
+```
+latent-watch/
+├── README.md
+├── ATTRIBUTION.md
+├── pyproject.toml
+│
+├── configs/
+│   ├── data/beavertails_risk.yaml
+│   ├── training/
+│   │   ├── llama_1b_answer_only.yaml
+│   │   ├── llama_1b_cot.yaml
+│   │   └── llama_1b_coconut.yaml
+│   └── evaluation/safety_risk.yaml
+│
+├── data/processed/beavertails_risk_v1/
+│   ├── canonical/{train,validation,test}.jsonl
+│   ├── answer_only/{train,validation,test}.jsonl
+│   ├── cot/{train,validation,test}.jsonl      # COCONUT reads from here too
+│   └── challenge/matched_context_test.jsonl
+│
+├── src/latent_watch/
+│   ├── data/          # load, normalize, aggregate, split, generate rationales
+│   ├── training/      # base_trainer, formatters, lora_utils, coconut, train_*.py
+│   └── evaluation/    # classification, category, matched-pairs, latent-steps
+│
+├── checkpoints/
+│   ├── answer_only/best_adapter/
+│   ├── cot/best_adapter/
+│   └── coconut/best_adapter/   # includes tokenizer with <bot>/<eot>
+│
+├── results/
+│   ├── answer_only.csv
+│   ├── cot.csv
+│   └── latent.csv
+│
+├── notebooks/
+│   ├── 01_dataset_audit.ipynb
+│   ├── 02_sampling_review.ipynb
+│   ├── 03_rationale_review.ipynb
+│   └── 04_train_pilot.ipynb    # Colab T4 entry point
+│
+└── tests/
+    ├── test_aggregation.py
+    ├── test_any_unsafe_rule.py
+    ├── test_split_leakage.py
+    ├── test_category_sampling.py
+    └── test_rendered_formats.py
+```
 
-1. Finish full-coverage CoT raw-output capture and resolve whether the CoT/COCONUT contrast is real or a small-sample artifact.
-2. Rule out generic small-model decoding degeneration (repetition loops) as a confound in the CoT results.
-3. Complete the three-way format comparison (COCONUT / CoT / No-CoT) on matched base model + dataset.
-4. Test a GSM8K-trained COCONUT checkpoint to check whether collapse is specific to narrow binary-answer domains like ProntoQA.
+---
 
-## Data & Licensing
+## Data & licensing
 
-Uses BeaverTails (CC BY-NC 4.0) for prompt data, and checkpoints/tooling from Dilgren & Wiegreffe's `are-lrms-easily-interpretable` (MIT) for the underlying experiments. Non-commercial research use only. Full citations and license terms in [`ATTRIBUTION.md`](./ATTRIBUTION.md).
+Uses **BeaverTails** (PKU-Alignment, CC-BY-NC-4.0) for prompt data. Base model: `meta-llama/Llama-3.2-1B` (Llama 3.2 Community License). Reasoning traces synthetically generated via OpenAI API; noted in dataset card. Non-commercial research use only. Full citations and license terms in [`ATTRIBUTION.md`](./ATTRIBUTION.md).
