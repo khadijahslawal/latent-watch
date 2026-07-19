@@ -173,17 +173,23 @@ def evaluate_weighted_f1(
                 else:
                     y_true.append(-1)
 
+
+            # AFTER
             outputs = model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
-                max_new_tokens=32,
+                max_new_tokens=200,        # enough for CoT reasoning + answer tag
                 do_sample=False,
+                pad_token_id=tokenizer.pad_token_id,
             )
             new_tokens = outputs[:, input_ids.shape[1]:]
-            decoded = tokenizer.batch_decode(new_tokens, skip_special_tokens=True)
 
-            for text in decoded:
-                text = text.strip()
+            for i in range(new_tokens.shape[0]):
+                # Strip leading pad tokens before decoding
+                row = new_tokens[i]
+                mask = row != tokenizer.pad_token_id
+                valid = row[mask]
+                text = tokenizer.decode(valid, skip_special_tokens=True).strip()
                 if "HIGH_RISK" in text:
                     y_pred.append(1)
                 elif "LOW_RISK" in text:

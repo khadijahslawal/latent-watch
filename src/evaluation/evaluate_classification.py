@@ -205,8 +205,12 @@ def evaluate(
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
             )
+
+        # REPLACE WITH
         new_tokens = gen_ids[:, input_ids.shape[1]:]
-        raw_output = tokenizer.decode(new_tokens[0], skip_special_tokens=True)
+        row = new_tokens[0]
+        valid_tokens = row[row != tokenizer.pad_token_id]
+        raw_output = tokenizer.decode(valid_tokens, skip_special_tokens=True).strip()
 
         # Extract prediction
         generated_reasoning = None
