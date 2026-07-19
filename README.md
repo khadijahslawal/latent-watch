@@ -113,9 +113,78 @@ At the final stage, no explicit reasoning is decoded. The answer is produced fro
 
 ---
 
-## Results
+## Latent Watch Results — Interim Results
 
-> **[Placeholder — experiments in progress]**
+### Experimental Setup
+
+| | Detail |
+|---|---|
+| **Model** | Llama-3.2-1B + LoRA (r=16, ~1.7M trainable params) |
+| **Task** | Task B elicitation risk classification (HIGH\_RISK / LOW\_RISK) |
+| **Dataset** | BeaverTails — 3,928 train / 429 val / 679 test |
+| **Label rule** | HIGH\_RISK if any observed response was unsafe (any-unsafe aggregation) |
+| **Primary metric** | Weighted F1 (class-imbalanced dataset) |
+
+---
+
+### E1 — Answer-Only Baseline (Complete)
+
+> Model sees prompt only. No reasoning. Predicts label directly.
+
+| Metric | Value |
+|---|---|
+| **Weighted F1** | **0.9447** |
+| Accuracy | 0.9629 |
+| Weighted Precision | 0.9272 |
+| Weighted Recall | 0.9629 |
+| **HIGH\_RISK Recall** | **1.0000** ✓ |
+| LOW\_RISK Recall | 0.0000 |
+
+**Test set:** 512 examples (493 HIGH\_RISK / 19 LOW\_RISK)
+
+#### Confusion Matrix
+
+|  | Pred HIGH\_RISK | Pred LOW\_RISK |
+|---|---|---|
+| **True HIGH\_RISK** | 493 | 0 |
+| **True LOW\_RISK** | 19 | 0 |
+
+#### Key observations
+
+- Perfect HIGH\_RISK recall: the model never misses an unsafe prompt
+- LOW\_RISK recall is 0.0000: the model predicts HIGH\_RISK for all examples
+- This reflects class imbalance: test set is 96% HIGH\_RISK (493/512)
+- The model learned a high-recall, low-precision strategy for LOW\_RISK — consistent with the BeaverTails distribution and the any-unsafe labelling rule
+- Weighted F1 of 0.9447 is dominated by HIGH\_RISK performance; macro F1 (0.49) reflects the LOW\_RISK failure
+
+---
+
+### E2 — Chain-of-Thought (Evaluation Running)
+
+> Model generates explicit reasoning trace before predicting label.
+> Results pending — evaluation in progress on Colab T4.
+
+---
+
+### E3 — COCONUT Latent Reasoning (Training Running)
+
+> Reasoning migrates from token space into continuous latent hidden states.
+> Training in progress on rented A100 (Lambda Labs).
+> This is the primary experimental condition for the research question.
+
+---
+
+### Next Steps
+
+- Complete E2 and E3 evaluation
+- Compare weighted F1 across E1 / E2 / E3
+- Analyse per-category performance on HIGH\_RISK harm categories
+- Investigate LOW\_RISK classification failure across all three conditions
+
+---
+
+*Training infrastructure: Google Colab Pro (T4) for E1/E2, RunPod A100 SXM for E3*
+*Dataset: BeaverTails (CC-BY-NC-4.0) | Model: Llama-3.2-1B (Meta)*
 
 Results will report, for each experiment, on the held-out test set:
 
