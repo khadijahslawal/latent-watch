@@ -296,4 +296,11 @@ latent-watch/
 
 ## Data & licensing
 
-Uses **BeaverTails** (PKU-Alignment, CC-BY-NC-4.0) for prompt data. Base model: `meta-llama/Llama-3.2-1B` (Llama 3.2 Community License). Reasoning traces synthetically generated via OpenAI API; noted in dataset card. Non-commercial research use only. Full citations and license terms in [`ATTRIBUTION.md`](./ATTRIBUTION.md).
+Uses:
+- **BeaverTails** (PKU-Alignment, CC-BY-NC-4.0) for prompt data.
+- Base model: `meta-llama/Llama-3.2-1B` (Llama 3.2 Community License).
+- Reasoning traces synthetically generated via OpenAI API; noted in dataset card.
+
+Non-commercial research use only.
+
+Full citations and license terms in [`ATTRIBUTION.md`](./ATTRIBUTION.md).
