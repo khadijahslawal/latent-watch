@@ -1,26 +1,26 @@
 # Latent Watch
 ## Can Latent Reasoning Be Safety-Monitored?
 
-**BlueDot Impact — Technical AI Safety Project Sprint**  
+**BlueDot Impact - Technical AI Safety Project Sprint**  
 **Author:** Khadija Shuaib  
-**Project Status:** Active — training in progress  
+**Project Status:** Active - training in progress  
 **Full working log:**
 
 ---
 
 ## The problem
 
-As reasoning migrates from token-level chain-of-thought into continuous latent space (COCONUT-style architectures), CoT monitoring doesn't just get less reliable — it becomes structurally impossible. There is no longer a natural-language trace to read.
+As reasoning migrates from token-level chain-of-thought into continuous latent space (COCONUT-style architectures), CoT monitoring doesn't just get less reliable; it becomes structurally impossible. There is no longer a natural-language trace to read.
 
 This raises a question that existing interpretability and monitoring work hasn't answered: **is safety-relevant signal even present in latent representations, and can it be extracted before the reasoning window closes entirely?**
 
-This project builds directly on Chang et al. (arXiv:2606.01243), which showed that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs — but studied only reasoning accuracy tasks. We ask whether that structure extends to safety-relevant content.
+This project builds directly on Chang et al. (arXiv:2606.01243), which showed that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs, but studied only reasoning accuracy tasks. We ask whether that structure extends to safety-relevant content.
 
 ---
 
 ## Research question
 
-Given a prompt, can we predict whether it has demonstrated a risk of eliciting an unsafe response — **without observing any chain-of-thought?**
+Given a prompt, can we predict whether it has demonstrated a risk of eliciting an unsafe response **without observing any chain-of-thought?**
 
 More precisely: does latent reasoning encode safety-relevant information that is (a) present, (b) extractable, and (c) causally connected to model outputs, when there is no readable reasoning trace at all?
 
@@ -28,11 +28,11 @@ More precisely: does latent reasoning encode safety-relevant information that is
 
 ## Why this matters for AI safety
 
-Current safety monitoring of frontier models relies heavily on inspecting chain-of-thought outputs. Anthropic's usage policies, the safety cases in Responsible Scaling Policy documents, and most deployed monitoring pipelines assume that *if reasoning is present, it is readable*. COCONUT-style architectures break this assumption at the architectural level.
+Current safety monitoring of frontier models relies heavily on inspecting chain-of-thought outputs. Anthropic's usage policies, the safety cases in Responsible Scaling Policy documents, and most deployed monitoring pipelines assume that *if reasoning is present, it is readable*. However, COCONUT-style architectures break this assumption at the architectural level.
 
-This isn't a hypothetical concern. The COCONUT paper (Hao et al. 2024) demonstrates that models can be trained to reason entirely in continuous latent space, producing outputs with no intermediate text. If such architectures are adopted — and the performance advantages give strong incentive to do so — then any monitoring approach that depends on CoT inspection fails by construction.
+This isn't a hypothetical concern. The COCONUT paper (Hao et al. 2024) demonstrates that models can be trained to reason entirely in continuous latent space, producing outputs with no intermediate text. If such architectures are widely adopted and the performance advantages (which exists) give strong incentive towards shifting to them then any monitoring approach that depends on CoT inspection fails by construction.
 
-This project investigates whether an alternative is possible: detecting safety-relevant signal from latent activations directly, without the reasoning trace. A positive result would suggest that latent-space monitoring tools (probes, SAEs, representation-level classifiers) could partially recover what CoT inspection currently provides. A negative result would be equally informative, quantifying the monitoring gap that latent reasoning architectures would introduce.
+This project investigates whether an alternative is possible: We are essentially asking if its possible to detect safety-relevant signal from latent activations directly, without the reasoning trace. A positive result would suggest that latent-space monitoring tools (probes, SAEs, representation-level classifiers) could partially recover what CoT inspection currently provides. A negative result would be equally informative, quantifying the monitoring gap that latent reasoning architectures would introduce.
 
 ---
 
@@ -40,27 +40,28 @@ This project investigates whether an alternative is possible: detecting safety-r
 
 The core experiment trains three LoRA adapters on Llama-3.2-1B, one for each reasoning format, on a shared safety classification task. All else is held equal.
 
-**Task (Task B):** Given a prompt, predict its observed safety risk.  
+**Key Task:** Given a prompt, predict its observed safety risk.  
 - `HIGH_RISK`: at least one observed response to the prompt was unsafe  
 - `LOW_RISK`: all observed responses were safe
 
 | Experiment | Reasoning format | What it tests |
 |---|---|---|
-| E1 — Answer-only | No reasoning trace | Baseline: prompt features alone |
-| E2 — CoT | Explicit `<reasoning>...</reasoning>` | Upper bound: readable intermediate reasoning |
-| E3 — COCONUT | Continuous latent thoughts (`<bot>/<eot>`) | Target condition: latent reasoning only |
+| E1 - Answer-only | No reasoning trace | Baseline: prompt features alone |
+| E2 - CoT | Explicit `<reasoning>...</reasoning>` | Upper bound: readable intermediate reasoning |
+| E3 - COCONUT | Continuous latent thoughts (`<bot>/<eot>`) | Target condition: latent reasoning only |
 
-The primary comparison is **E3 vs E2**: does latent reasoning match CoT's ability to detect safety-relevant signal, even though no intermediate text is produced? The secondary comparison is **E2 vs E1**: does explicit reasoning actually help at all for this task, before asking whether latent reasoning can replicate it.
+- The primary comparison is **E3 vs E2**: does latent reasoning match CoT's ability to detect safety-relevant signal, even though no intermediate text is produced?
+- The secondary comparison is **E2 vs E1**: does explicit reasoning actually help at all for this task, before asking whether latent reasoning can replicate it.
 
 ---
 
 ## Dataset
 
-**Source:** BeaverTails (PKU-Alignment, CC-BY-NC-4.0) — 330k prompt-response pairs with harm category labels and human safety annotations.
+**Source:** BeaverTails (PKU-Alignment, CC-BY-NC-4.0) - 330k prompt-response pairs with harm category labels and human safety annotations.
 
-**Labelling policy:** Deduplicate by prompt; label `HIGH_RISK` if any paired response was unsafe. This is a deliberate high-recall choice: we care about prompts that *can* elicit unsafe outputs, not just those that *always* do.
+**Labelling policy:** Deduplicated by prompt; labeled `HIGH_RISK` if any paired response was unsafe. This is a deliberate recall choice to encourage high-recall as we care about prompts that *can* elicit unsafe outputs, not just those that *always* do.
 
-**Reasoning traces:** Synthetically generated via GPT-4o-mini, conditioned on ground-truth labels and harm categories. The generator does not see paired responses, ensuring it cannot learn information unavailable at inference time. Traces are validated against a set of rejection criteria (label contradiction, mention of observed responses, vague or overlong reasoning).
+**Reasoning traces:** Since the dataset doesn't come with reasoning traces, we had to synthetically generate one; this was done via GPT-4o-mini, conditioned on ground-truth labels and harm categories. The generator does not see the paired responses, ensuring it cannot learn information unavailable at inference time. Furthermore, the reasonong traces were validated against a set of rejection criteria (example: label contradiction, mention of observed responses, vague or overlong reasoning).
 
 **Split (after deduplication and sampling):**
 
@@ -70,7 +71,9 @@ The primary comparison is **E3 vs E2**: does latent reasoning match CoT's abilit
 | Validation | 429 | 250 | 179 |
 | Test | 679 | 500 | 179 |
 
-Class imbalance is by design and matches BeaverTails' natural distribution. Primary metric is **weighted F1**; `HIGH_RISK` recall is reported separately as the safety-critical error type.
+Class imbalance does exist in the dataset by design and matches BeaverTails' natural distribution. 
+
+The Primary metric is **weighted F1**; `HIGH_RISK` recall is reported separately as the safety-critical error type.
 
 **Harm categories covered (14):** animal abuse, child abuse, controversial topics / politics, discrimination / stereotype / injustice, drug abuse / weapons / banned substances, financial crime / property crime / theft, hate speech / offensive language, misinformation regarding ethics-laws-safety, non-violent unethical behaviour, privacy violation, self-harm, sexually explicit / adult content, terrorism / organised crime, violence / aiding / abetting / incitement.
 
@@ -113,7 +116,7 @@ At the final stage, no explicit reasoning is decoded. The answer is produced fro
 
 ---
 
-## Latent Watch Results — Interim Results
+## Latent Watch Results - Interim Results
 
 ### Experimental Setup
 
@@ -121,13 +124,13 @@ At the final stage, no explicit reasoning is decoded. The answer is produced fro
 |---|---|
 | **Model** | Llama-3.2-1B + LoRA (r=16, ~1.7M trainable params) |
 | **Task** | Task B elicitation risk classification (HIGH\_RISK / LOW\_RISK) |
-| **Dataset** | BeaverTails — 3,928 train / 429 val / 679 test |
+| **Dataset** | BeaverTails - 3,928 train / 429 val / 679 test |
 | **Label rule** | HIGH\_RISK if any observed response was unsafe (any-unsafe aggregation) |
 | **Primary metric** | Weighted F1 (class-imbalanced dataset) |
 
 ---
 
-### E1 — Answer-Only Baseline (Complete)
+### E1 - Answer-Only Baseline (Complete)
 
 > Model sees prompt only. No reasoning. Predicts label directly.
 
@@ -154,19 +157,19 @@ At the final stage, no explicit reasoning is decoded. The answer is produced fro
 - Perfect HIGH\_RISK recall: the model never misses an unsafe prompt
 - LOW\_RISK recall is 0.0000: the model predicts HIGH\_RISK for all examples
 - This reflects class imbalance: test set is 96% HIGH\_RISK (493/512)
-- The model learned a high-recall, low-precision strategy for LOW\_RISK — consistent with the BeaverTails distribution and the any-unsafe labelling rule
+- The model learned a high-recall, low-precision strategy for LOW\_RISK - consistent with the BeaverTails distribution and the any-unsafe labelling rule
 - Weighted F1 of 0.9447 is dominated by HIGH\_RISK performance; macro F1 (0.49) reflects the LOW\_RISK failure
 
 ---
 
-### E2 — Chain-of-Thought (Evaluation Running)
+### E2 - Chain-of-Thought (Evaluation Running)
 
 > Model generates explicit reasoning trace before predicting label.
-> Results pending — evaluation in progress on Colab T4.
+> Results pending; evaluation in progress on Colab T4.
 
 ---
 
-### E3 — COCONUT Latent Reasoning (Training Running)
+### E3 - COCONUT Latent Reasoning (Training Running)
 
 > Reasoning migrates from token space into continuous latent hidden states.
 > Training in progress on rented A100 (Lambda Labs).
@@ -207,11 +210,11 @@ The key comparisons:
 
 ## What we expect to find (and why it matters either way)
 
-**If E3 ≈ E2 (latent reasoning matches CoT performance):** This would suggest that safety-relevant signal is not merely encoded in the readable trace — it is present in the latent representations themselves, and is predictive of outputs. This opens the door to probe-based or representation-level monitoring as an alternative to CoT inspection.
+**If E3 ≈ E2 (latent reasoning matches CoT performance):** This would suggest that safety-relevant signal is not merely encoded in the readable trace. It is present in the latent representations themselves, and is predictive of outputs. This opens the door to probe-based or representation-level monitoring as an alternative to CoT inspection.
 
 **If E3 << E2 (latent reasoning underperforms CoT):** This would quantify the monitoring gap that latent architectures introduce, and would motivate investment in alternative interpretability tools (SAE-based feature discovery, activation-level anomaly detection) to partially recover what is lost.
 
-**If E3 ≈ E1 (latent reasoning adds nothing beyond prompt features):** This would suggest that latent reasoning in COCONUT doesn't meaningfully engage with safety-relevant content at all, at least in this training regime — a finding with implications for how latent reasoning models respond to safety-relevant inputs in practice.
+**If E3 ≈ E1 (latent reasoning adds nothing beyond prompt features):** This would suggest that latent reasoning in COCONUT doesn't meaningfully engage with safety-relevant content at all, at least in this training regime; a finding with implications for how latent reasoning models respond to safety-relevant inputs in practice.
 
 Any of these outcomes is informative. The staged design ensures the null result is not vacuous.
 
@@ -223,7 +226,7 @@ Any of these outcomes is informative. The staged design ensures the null result 
 
 **Training data:** Reasoning traces are synthetically generated, not human-authored. The quality of CoT (and by extension COCONUT's curriculum signal) depends on GPT-4o-mini's ability to produce rationales that reflect genuine risk reasoning rather than label-correlated surface patterns.
 
-**Task framing:** Task B classifies *prompt-level* elicitation risk based on observed response variance — it is not a real-time inference task and does not simulate deployment conditions directly. Results speak to whether latent representations encode safety signal in principle, not to operational monitoring performance.
+**Task framing:** This task framing for this project classifies *prompt-level* elicitation risk based on observed response variance. It is not a real-time inference task and does not simulate deployment conditions directly. Results speak to whether latent representations encode safety signal in principle, not to operational monitoring performance.
 
 **COCONUT implementation:** We implement COCONUT from scratch following Hao et al. 2024, not using Dilgren & Wiegreffe's codebase. Differences in implementation may affect comparability to other COCONUT results in the literature.
 
@@ -233,7 +236,7 @@ Any of these outcomes is informative. The staged design ensures the null result 
 
 - **Chang et al. (arXiv:2606.01243):** Establishes that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs (§3.2–3.3). We extend their investigation to safety-relevant content.
 - **Hao et al. 2024 (COCONUT):** Original architecture and training curriculum for continuous-thought reasoning models.
-- **Dilgren & Wiegreffe (arXiv:2604.04902):** Independent finding that latent tokens are often causally inert on logical-reasoning tasks — a motivation for our necessity checks and staged experimental design.
+- **Dilgren & Wiegreffe (arXiv:2604.04902):** Independent finding that latent tokens are often causally inert on logical-reasoning tasks-  a motivation for our necessity checks and staged experimental design.
 - **BeaverTails (Ji et al.):** Prompt-response safety dataset with 14-category harm labels. Primary data source.
 
 ---
