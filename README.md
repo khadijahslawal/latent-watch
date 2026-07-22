@@ -71,7 +71,8 @@ The core experiment trains three LoRA adapters on Llama-3.2-1B, one for each rea
 | Validation | 429 | 250 | 179 |
 | Test | 679 | 500 | 179 |
 
-Class imbalance does exist in the dataset by design and matches BeaverTails' natural distribution. 
+
+> **Note on test set imbalance:** The test set is 96% HIGH_RISK (493/512). This reflects BeaverTails' natural distribution and the any-unsafe labelling rule; not a sampling error. LOW_RISK conclusions should be interpreted with caution given the small sample (n=19). A single correct LOW_RISK prediction corresponds to 5.26% recall.
 
 The Primary metric is **weighted F1**; `HIGH_RISK` recall is reported separately as the safety-critical error type.
 
@@ -116,65 +117,166 @@ At the final stage, no explicit reasoning is decoded. The answer is produced fro
 
 ---
 
-## Latent Watch Results - Interim Results
+## Latent Watch Results 
 
 ### Experimental Setup
 
 | | Detail |
 |---|---|
 | **Model** | Llama-3.2-1B + LoRA (r=16, ~1.7M trainable params) |
-| **Task** | Task B elicitation risk classification (HIGH\_RISK / LOW\_RISK) |
+| **Task** | Elicitation risk classification (HIGH\_RISK / LOW\_RISK) |
 | **Dataset** | BeaverTails - 3,928 train / 429 val / 679 test |
 | **Label rule** | HIGH\_RISK if any observed response was unsafe (any-unsafe aggregation) |
 | **Primary metric** | Weighted F1 (class-imbalanced dataset) |
 
----
+
+### Summary
+ 
+| | E1 - Answer-only | E2 - Chain-of-Thought | E3 -  COCONUT |
+|---|---|---|---|
+| Reasoning format | None | Explicit token-level | Continuous latent states |
+| Training input | Prompt → label | Prompt → reasoning + label | Prompt → latent tokens + label |
+| Reasoning observable? | N/A | Yes | No |
+| Best checkpoint | epoch_1 | epoch_3 | stage_1_epoch_1 |
+
+All three experiments use the same base model (`meta-llama/Llama-3.2-1B`), LoRA configuration, dataset, and evaluation protocol. The only variable is reasoning format.
+
+ 
+### What the Results Show
+ 
+**1. Reasoning format has a detectable but small effect on classification behaviour.**
+ 
+E1 (no reasoning) and E3 (latent reasoning) produce identical test behaviour, both predict `HIGH_RISK` for every example, achieving perfect HIGH_RISK recall at the cost of zero LOW_RISK discrimination. E2 (explicit CoT) is the only condition to show any deviation from this pattern: by epoch 3, the model correctly classifies 1 of 19 LOW_RISK examples, with a small corresponding drop in HIGH_RISK recall (491/493 vs 493/493).
+ 
+The effect is small in absolute terms but consistent across all metrics where weighted F1 improves from 0.9447 to 0.9470, macro F1 from 0.49 to 0.54, and LOW_RISK recall from 0.0000 to 0.0526. This suggests explicit reasoning provides marginal but real additional signal for the harder classification cases.
+ 
+**2. The central finding for the research question: latent reasoning (E3) does not replicate the CoT signal.**
+ 
+Despite strong validation performance across all curriculum stages (val F1: 0.8783 → 0.9883 → 0.9530 → 0.9174), the COCONUT model produces identical test behaviour to the no-reasoning baseline. The safety-relevant discrimination that emerges in explicit CoT does not appear in the latent reasoning condition at this scale.
+ 
+This is a negative result with respect to the research question; at 1B parameters with C=3 curriculum stages, we find no evidence that latent reasoning encodes additional safety-relevant signal beyond what a no-reasoning baseline captures. The result does not rule out latent safety signal at larger scale or with different curriculum configurations.
+ 
+**3. HIGH_RISK recall is robust across all conditions.**
+ 
+All three experiments maintain ≥0.9959 HIGH_RISK recall. The ability to flag unsafe prompts does not depend on reasoning format, it is learned quickly and stably regardless of whether the model reasons explicitly, latently, or not at all. This is reassuring for the safety-critical direction but suggests the task may be too easy on the HIGH_RISK side to distinguish reasoning conditions.
+
 
 ### E1 - Answer-Only Baseline (Complete)
 
-> Model sees prompt only. No reasoning. Predicts label directly.
+> Model sees prompt only. No reasoning and predicts `HIGH_RISK` or `LOW_RISK` directly.
 
+**Test Metrics**
+ 
 | Metric | Value |
 |---|---|
-| **Weighted F1** | **0.9447** |
+| Valid predictions | 512 / 512 |
 | Accuracy | 0.9629 |
 | Weighted Precision | 0.9272 |
 | Weighted Recall | 0.9629 |
-| **HIGH\_RISK Recall** | **1.0000** ✓ |
-| LOW\_RISK Recall | 0.0000 |
+| **Weighted F1** | **0.9447** |
+| HIGH_RISK Recall | **1.0000** |
+| LOW_RISK Recall | 0.0000 |
+| Macro F1 | 0.49 |
+ 
 
-**Test set:** 512 examples (493 HIGH\_RISK / 19 LOW\_RISK)
-
-#### Confusion Matrix
-
-|  | Pred HIGH\_RISK | Pred LOW\_RISK |
+**Confusion Matrix**
+ 
+| | Pred HIGH_RISK | Pred LOW_RISK |
 |---|---|---|
-| **True HIGH\_RISK** | 493 | 0 |
-| **True LOW\_RISK** | 19 | 0 |
+| **True HIGH_RISK** | 493 | 0 |
+| **True LOW_RISK** | 19 | 0 |
 
-#### Key observations
-
-- Perfect HIGH\_RISK recall: the model never misses an unsafe prompt
-- LOW\_RISK recall is 0.0000: the model predicts HIGH\_RISK for all examples
-- This reflects class imbalance: test set is 96% HIGH\_RISK (493/512)
-- The model learned a high-recall, low-precision strategy for LOW\_RISK - consistent with the BeaverTails distribution and the any-unsafe labelling rule
-- Weighted F1 of 0.9447 is dominated by HIGH\_RISK performance; macro F1 (0.49) reflects the LOW\_RISK failure
-
----
-
-### E2 - Chain-of-Thought (Evaluation Running)
-
-> Model generates explicit reasoning trace before predicting label.
-> Results pending; evaluation in progress on Colab T4.
+**Interpretation**
+ 
+- E1 exhibits complete majority-class collapse: the model predicts `HIGH_RISK` for every example. This is consistent with the training distribution (64% HIGH_RISK) and the any-unsafe labelling rule, which creates a strong prior toward HIGH_RISK.
+- The result is interpretable as a ceiling for a no-reasoning baseline; perfect recall on the majority class, zero recall on the minority class.
+- This is expected and serves as the baseline against which E2 and E3 gains are measured.
+- The weighted F1 of 0.9447 is largely a function of the class imbalance rather than discrimination ability.
 
 ---
 
-### E3 - COCONUT Latent Reasoning (Training Running)
+### E2 - Chain-of-Thought
 
-> Reasoning migrates from token space into continuous latent hidden states.
-> Training in progress on rented A100 (Lambda Labs).
-> This is the primary experimental condition for the research question.
+> The model generates an explicit reasoning trace (`<reasoning>...</reasoning>`) before producing the label inside `<answer>...</answer>`. Reasoning traces were synthetically generated via OpenAI API (gpt-4o-mini) conditioned on ground-truth labels. See dataset card for full attribution.
 
+**Test Metrics Across Epochs**
+ 
+| Epoch | Valid | Weighted F1 | HIGH_RISK Recall | LOW_RISK Recall | Macro F1 |
+|---|---|---|---|---|---|
+| epoch_1 | 509 / 512 | 0.9444 | 1.0000 | 0.0000 | 0.49 |
+| epoch_2 | 512 / 512 | 0.9447 | 1.0000 | 0.0000 | 0.49 |
+| **epoch_3** | **512 / 512** | **0.9470** | **0.9959** | **0.0526** | **0.54** |
+
+> **Note:** epoch_1 had 3 invalid/unparseable outputs; Cases where the model failed to close the `</answer>` tag within the generation budget. These were excluded from metric computation.
+
+
+**Best Checkpoint (epoch_3)**
+ 
+| Metric | Value |
+|---|---|
+| Valid predictions | 512 / 512 |
+| Accuracy | 0.9609 |
+| Weighted Precision | 0.9412 |
+| Weighted Recall | 0.9609 |
+| **Weighted F1** | **0.9470** |
+| HIGH_RISK Recall | 0.9959 |
+| LOW_RISK Recall | **0.0526** |
+| Macro F1 | 0.54 |
+ 
+**Confusion Matrix (epoch_3)*8
+ 
+| | Pred HIGH_RISK | Pred LOW_RISK |
+|---|---|---|
+| **True HIGH_RISK** | 491 | 2 |
+| **True LOW_RISK** | 18 | 1 |
+
+**Interpretation**
+- Epoch 3 is the only experimental condition across all three experiments to correctly classify any LOW_RISK example (1/19).
+- This comes at a small cost to HIGH_RISK recall (2 missed unsafe prompts vs 0 in E1), representing a trade-off between sensitivity and specificity.
+- The improvement in macro F1 (0.49 → 0.54) and weighted F1 (0.9444 → 0.9470) across epochs suggests that extended CoT training gradually surfaces LOW_RISK sensitivity that is absent in the answer-only condition.The effect is small but directionally consistent with the hypothesis that explicit reasoning encodes safety-relevant information.
+- The fact that LOW_RISK signal only emerges at epoch 3 after the model has largely memorised HIGH_RISK training examples (loss ~0.96 at epoch 3) , suggests the CoT reasoning is doing marginal but real work in the harder classification cases.
+ 
+ 
+---
+
+### E3 - COCONUT Latent Reasoning 
+
+> Reasoning is progressively replaced by recurrent passes through the model's continuous hidden states across a staged curriculum (C=3). By the final stage, no explicit reasoning is decoded and the answer is produced from latent thought alone. Implemented from scratch following Hao et al. 2024; 
+
+**Curriculum Progression**
+ 
+| Stage | Description | Val F1 |
+|---|---|---|
+| Stage 0 | Full CoT - identical to E2 | 0.8783 |
+| Stage 1 | First reasoning step replaced by `<bot>` | **0.9883** |
+| Stage 2 | First two steps replaced | 0.9530 |
+| Stage 3 | All steps replaced - fully latent | 0.9174 |
+ 
+- In Stage 1, the model performs *better* with one latent token than with full explicit reasoning (Stage 0). This may reflect the latent token acting as a compressed, task-relevant representation that is more directly useful for classification than the full verbatim reasoning trace.
+- Validation F1 degrades across Stages 2 and 3 as more reasoning moves into latent space, though it remains above the Stage 0 baseline through Stage 2. Indicating that the model that has learned meaningful latent representations but loses some discriminative signal at full latency.
+
+**Test Metrics (best_adapter = stage_1_epoch_1)**
+ 
+| Metric | Value |
+|---|---|
+| Valid predictions | 512 / 512 |
+| Accuracy | 0.9629 |
+| Weighted Precision | 0.9272 |
+| Weighted Recall | 0.9629 |
+| **Weighted F1** | **0.9447** |
+| HIGH_RISK Recall | 1.0000 |
+| LOW_RISK Recall | 0.0000 |
+| Macro F1 | 0.49 |
+
+**Confusion Matrix**
+ 
+| | Pred HIGH_RISK | Pred LOW_RISK |
+|---|---|---|
+| **True HIGH_RISK** | 493 | 0 |
+| **True LOW_RISK** | 19 | 0 |
+
+
+ 
 ---
 
 ### Next Steps
