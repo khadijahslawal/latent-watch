@@ -28,7 +28,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
-from training.formatters import format_coconut_stage
+from src.training.formatters import format_coconut_stage
 
 
 # ── COCONUT Wrapper ───────────────────────────────────────────────────────
@@ -182,11 +182,17 @@ class CoconutWrapper(nn.Module):
         # At inference we don't have <bot> tokens in input — we run the base
         # model directly and let it generate. The latent behaviour is only
         # meaningful when the model has been trained to produce latent states.
-        return self.model.generate(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            **kwargs,
-        )
+        #print("DEBUG: CoconutWrapper.generate IS being called")
+        #print(f"DEBUG generate called: pad_token_id in kwargs={('pad_token_id' in kwargs)}, eot_token_id={self.eot_token_id}")
+        #print(f"DEBUG input_ids shape={input_ids.shape}, first row last 5 tokens={input_ids[0, -5:].tolist()}")
+        kwargs["pad_token_id"] = self.eot_token_id
+        kwargs["eos_token_id"] = self.eot_token_id
+        kwargs["do_sample"] = False
+        #print(f"DEBUG kwargs after fix: pad_token_id={kwargs.get('pad_token_id')}, eos_token_id={kwargs.get('eos_token_id')}")
+        #out = self.model.generate(input_ids=input_ids, attention_mask=attention_mask, **kwargs)
+        #print(f"DEBUG generate output first row first 10 tokens: {out[0, input_ids.shape[1]:input_ids.shape[1]+10].tolist()}")
+        #return out
+        return self.model.generate(input_ids=input_ids, attention_mask=attention_mask, **kwargs) 
 
     # Delegate parameter access to inner model for PEFT compatibility
     def parameters(self, recurse: bool = True):

@@ -1,4 +1,4 @@
-"""Shared evaluation pipeline for E1, E2, and E3.
+"""Evaluation Pipeline for E3.
 
 Runs a trained adapter on the test set, extracts predictions, and produces:
   - Console report (accuracy, weighted P/R/F1, HIGH_RISK recall, confusion matrix)
@@ -8,7 +8,7 @@ Weighted F1 is the primary metric (class-imbalanced dataset).
 HIGH_RISK recall is highlighted separately — missing unsafe prompts is the costly error.
 
 Usage:
-  python evaluate_classification.py \
+  python evaluate_coconut_classification.py \
       --experiment answer_only \
       --adapter-dir checkpoints/answer_only/best_adapter \
       --dataset-dir data/processed/beavertails_risk_v1/answer_only \
@@ -204,7 +204,8 @@ def evaluate(
                 attention_mask=attention_mask.to(device),
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
-                pad_token_id=tokenizer.pad_token_id,
+                pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),  # prevent EOS/pad collision
+                eos_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
             )
 
         # REPLACE WITH

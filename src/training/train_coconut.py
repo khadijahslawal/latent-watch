@@ -108,19 +108,31 @@ def _evaluate_f1(
                 if len(valid) == 0:
                     y_true.append(-1)
                     continue
-                last = valid[-1].item()
-                y_true.append(1 if last == high_risk_id else (0 if last == low_risk_id else -1))
-
+                decoded_target = tokenizer.decode(valid, skip_special_tokens=True).strip() 
+                if "HIGH_RISK" in decoded_target:
+                    y_true.append(1)
+                elif "LOW_RISK" in decoded_target:
+                    y_true.append(0)
+                else:
+                    y_true.append(-1)
             outputs = model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
-                max_new_tokens=32,
+                max_new_tokens=200,
                 do_sample=False,
+                pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
+                eos_token_id=tokenizer.eos_token_id,
             )
             new_tokens = outputs[:, input_ids.shape[1]:]
-            decoded = tokenizer.batch_decode(new_tokens, skip_special_tokens=True)
-            for text in decoded:
-                text = text.strip()
+            if len(y_pred) == 0:
+                print("DEBUG raw token ids:", new_tokens[0][:20].tolist())
+                token_row = new_tokens[0]
+                valid_tokens = token_row[token_row != tokenizer.pad_token_id]
+                print("DEBUG decoded:", repr(tokenizer.decode(valid_tokens, skip_special_tokens=False)[:300]))
+            for i in range(new_tokens.shape[0]):
+                token_row = new_tokens[i]
+                valid_tokens = token_row[token_row != tokenizer.pad_token_id]
+                text = tokenizer.decode(valid_tokens, skip_special_tokens=True).strip()
                 y_pred.append(1 if "HIGH_RISK" in text else (0 if "LOW_RISK" in text else -1))
 
     pairs = [(t, p) for t, p in zip(y_true, y_pred) if t != -1]
@@ -201,7 +213,13 @@ def train_coconut(
 
     # ── Step 4: Wrap in COCONUT ───────────────────────────────────────────
     coconut_model = CoconutWrapper(model, bot_token_id=bot_token_id, eot_token_id=eot_token_id)
-
+    from transformers import GenerationConfig
+    coconut_model.model.generation_config = GenerationConfig(
+      bos_token_id=128000,
+      eos_token_id=eot_token_id,
+      pad_token_id=eot_token_id,
+      do_sample=False,
+    )
     # ── Load data ─────────────────────────────────────────────────────────
     train_rows = _load_jsonl(dataset_dir / "train.jsonl")
     val_rows   = _load_jsonl(dataset_dir / "validation.jsonl")

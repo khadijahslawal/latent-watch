@@ -26,7 +26,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, get_cosine_schedule_with_warmup
 from sklearn.metrics import f1_score
 
-from training.lora_utils import save_adapter, save_adapter_with_tokenizer
+from src.training.lora_utils import save_adapter, save_adapter_with_tokenizer
 
 
 # ── Dataset ───────────────────────────────────────────────────────────────
@@ -190,6 +190,8 @@ def evaluate_weighted_f1(
                 mask = row != tokenizer.pad_token_id
                 valid = row[mask]
                 text = tokenizer.decode(valid, skip_special_tokens=True).strip()
+                if len(y_pred) < 3:
+                    print(f"DEBUG [{i}]: {repr(text[:200])}")
                 if "HIGH_RISK" in text:
                     y_pred.append(1)
                 elif "LOW_RISK" in text:
