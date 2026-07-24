@@ -4,7 +4,6 @@
 **BlueDot Impact - Technical AI Safety Project Sprint**  
 **Author:** Khadija Shuaib  
 **Project Status:** Active - Pilot Training Completed, Analysis and Latent Probing in Progress
-**Full working log:**
 
 ---
 
@@ -404,21 +403,21 @@ The gap between strong curriculum validation performance and near-zero LOW_RISK 
 
 **Immediate**:
 
-1. Behavioral downstream analysis (≈50%): identify and categorize the prompts where CoT succeeds and COCONUT fails. This gives us the narrative for the paper and tells us what kind of reasoning is being lost.
-2. Information-survival analysis (≈30%): quantify how many of CoT’s gains over the answer-only baseline are retained by COCONUT. This directly addresses the research question in behavioral terms.
-3. Latent probing (≈20%): determine whether the latent representations still contain the safety information that the decoder fails to use. This provides a mechanistic explanation for the behavioral findings.
+1. Behavioral downstream analysis: Identify and categorize the prompts where CoT succeeds and COCONUT fails. This gives us the narrative for the paper and tells us what kind of reasoning is being lost.
+2. Information-survival analysis: Quantify how many of CoT’s gains over the answer-only baseline are retained by COCONUT. This directly addresses the research question in behavioral terms.
+3. Latent probing: Determine whether the latent representations still contain the safety information that the decoder fails to use. This provides a mechanistic explanation for the behavioral findings.
 
 **Longer term**
 
-1. To address the scale question: Rerun E2 and E3 at Llama-3.1-8B or Qwen3-8B — does the E3 LOW_RISK collapse persist at larger scale?
+1. To address the scale question, we should rerun E2 and E3 at Llama-3.1-8B or Qwen3-8B. This helps in understanding if the E3 LOW_RISK collapse persist at larger scale?
 
 2. To look inside E3's representations:
 
-a. Linear probing on intermediate hidden states — is LOW_RISK signal present in E3's representations even when the classification head fails to surface it?
+&emsp; a. Linear probing on intermediate hidden states; We want to know if the LOW_RISK signal present in E3's representations even when the classification head fails to surface it?
 
-b. SAE-based feature discovery on latent thought tokens
+&emsp;  b. SAE-based feature discovery on latent thought tokens
   
-c. Activation-level comparison between E3 HIGH_RISK and LOW_RISK examples
+&emsp;  c. Activation-level comparison between E3 HIGH_RISK and LOW_RISK examples
 
 ---
 
