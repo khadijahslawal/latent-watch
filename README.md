@@ -12,14 +12,17 @@
   - [Why this matters for AI safety](#why-this-matters-for-ai-safety)
   - [Experimental design](#experimental-design)
   - [Dataset](#dataset)
-      - [Pre-processing Step 4: Generating Synthethic Reasoning traces](#pre-processing-step-4-generating-synthethic-reasoning-traces)
+    - [Pre-processing Step 1: Aggregating unique prompts](#pre-processing-step-1-aggregating-unique-prompts)
+    - [Pre-processing Step 2: Train, Validation, Test Split](#pre-processing-step-2-train-validation-test-split)
+    - [Pre-processing Step 3: Sampling](#pre-processing-step-3-sampling)
+    - [Pre-processing Step 4: Generating Synthetic Reasoning traces](#pre-processing-step-4-generating-synthetic-reasoning-traces)
   - [Model and training](#model-and-training)
   - [Latent Watch Results](#latent-watch-results)
     - [Experimental Setup](#experimental-setup)
     - [Summary](#summary)
     - [Results Summary](#results-summary)
-    - [Results Summary](#results-summary-1)
-    - [What the Results Show](#what-the-results-show)
+  - [Detailed Results](#detailed-results)
+    - [Results Interpretation](#results-interpretation)
     - [E1 - Answer-Only Baseline (Complete)](#e1---answer-only-baseline-complete)
     - [E2 - Chain-of-Thought](#e2---chain-of-thought)
     - [E3 - COCONUT Latent Reasoning](#e3---coconut-latent-reasoning)
@@ -41,6 +44,7 @@ This raises a question that existing interpretability and monitoring work hasn't
 
 This project builds directly on Chang et al. (arXiv:2606.01243), which showed that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs, but studied only reasoning accuracy tasks. We ask whether that structure extends to safety-relevant content.
 
+
 ---
 
 ## Research question
@@ -55,9 +59,9 @@ More precisely: does latent reasoning encode safety-relevant information that is
 
 Current safety monitoring of frontier models relies heavily on inspecting chain-of-thought outputs. Anthropic's usage policies, the safety cases in Responsible Scaling Policy documents, and most deployed monitoring pipelines assume that *if reasoning is present, it is readable*. However, COCONUT-style architectures break this assumption at the architectural level.
 
-This isn't a hypothetical concern. The COCONUT paper (Hao et al. 2024) demonstrates that models can be trained to reason entirely in continuous latent space, producing outputs with no intermediate text. If such architectures are widely adopted and the performance advantages (which exists) give strong incentive towards shifting to them then any monitoring approach that depends on CoT inspection fails by construction.
+This isn't a hypothetical concern. The COCONUT paper (Hao et al. 2024) demonstrates that models can be trained to reason entirely in continuous latent space, producing outputs with no intermediate text. If such architectures are widely adopted and the performance advantages (which exist) give strong incentive towards shifting to them, then any monitoring approach that depends on CoT inspection fails by construction.
 
-This project investigates whether an alternative is possible: We are essentially asking if its possible to detect safety-relevant signal from latent activations directly, without the reasoning trace. A positive result would suggest that latent-space monitoring tools (probes, SAEs, representation-level classifiers) could partially recover what CoT inspection currently provides. A negative result would be equally informative, quantifying the monitoring gap that latent reasoning architectures would introduce.
+This project investigates whether an alternative is possible: We are essentially asking if it's possible to detect safety-relevant signal from latent activations directly, without the reasoning trace. A positive result would suggest that latent-space monitoring tools (probes, SAEs, representation-level classifiers) could partially recover what CoT inspection currently provides. A negative result would be equally informative, quantifying the monitoring gap that latent reasoning architectures would introduce.
 
 ---
 
@@ -89,7 +93,7 @@ The core experiment trains three LoRA adapters on Llama-3.2-1B, one for each rea
 
 > **Note on dataset distribution and how we got there:** 
 
-In the original beavertails dataset card on hugging face. The following distribution was given:
+In the original BeaverTails dataset card on Hugging Face, the following distribution was given:
 |  | n | % | 
 |---|---|---|
 | Safe | 12,892 | 42.68% |
@@ -97,13 +101,13 @@ In the original beavertails dataset card on hugging face. The following distribu
 
 Our distribution differs due to certain pre-processing that needed to be done in order to make the dataset fit for the research question being posed.
 
-**Pre-processing Step 1: Aggregating unique prompts**
+### Pre-processing Step 1: Aggregating unique prompts
 
-BeaverTails labeled the safety of the prompt–response pair on whether the response contains harmful content. Thus, a single prompt may have several responses with different safety labels and may belong to multiple harm categories. If a pompt has is_safe == False does not necessarily mean the prompt itself expresses harmful intent; it can also mean that one model answered a benign, ambiguous, or dual-use prompt unsafely.
+BeaverTails labeled the safety of the prompt–response pair on whether the response contains harmful content. Thus, a single prompt may have several responses with different safety labels and may belong to multiple harm categories. If a prompt has is_safe == False, that does not necessarily mean the prompt itself expresses harmful intent; it can also mean that one model answered a benign, ambiguous, or dual-use prompt unsafely.
 
 This created a bit of challenge in how to decide what the ground-truth is; initially we considered doing a "majority carries the vote". However, this wouldn't work in the scenario whereby there is an even split between `is_safe == False` and `is_safe == True`.
 
-This brings us back to the task definition mentioned earlier. The task we are giving to the 3 models being experimented is **"Given the prompt, is it  likely to elicit an unsafe response from the model?"**. As such we decided to go with the following aggrgeation approach; essentially deduplicating by prompt; a prompt is labeled as `HIGH_RISK` if any paired response was unsafe. 
+This brings us back to the task definition mentioned earlier. The task we are giving to the 3 models being experimented with is **"Given the prompt, is it likely to elicit an unsafe response from the model?"**. As such we decided to go with the following aggregation approach; essentially deduplicating by prompt; a prompt is labeled as `HIGH_RISK` if any paired response was unsafe. 
 
 `HIGH_RISK_PROMPT = at least one observed response was unsafe`
 
@@ -112,19 +116,19 @@ This brings us back to the task definition mentioned earlier. The task we are gi
 Naturally this makes our curated dataset slightly diverge from the original BeaverTails in two different ways
 
 1. Total prompt count would be less as we aggregated on a prompt level
-2. The prompts risk label is more likely to skew towards `HIGH RISK` than `LOW RISK`
+2. The prompt's risk label is more likely to skew towards `HIGH RISK` than `LOW RISK`
 
 This labelling policy was a deliberate choice to encourage high-recall as we care about prompts that can elicit unsafe outputs, not just those that always do.
 
-**Pre-processing Step 2: Train, Validation, Test Split**
+### Pre-processing Step 2: Train, Validation, Test Split
 
 80%, 10%, 10% split was applied for the train, validation and test sets respectively; with a random seed = `42` for reproducibility. 
 
-**Pre-processing Step 3: Sampling**
+### Pre-processing Step 3: Sampling
 
 Following the deduplication and aggregation by prompt, to ensure the curated dataset is as balanced as possible, a two-step sampling approach was applied to the training set only - val and test used all available prompts up to their target sizes.
 
-1. The first sampling logic was within the `HIGH_RISK` category, where we  applied a per-category cap of `400` for the 14 different harmful categories in the dataset. This was done to ensure category coverage and to prevent a specific a type of harmful category from dominating the dataset.
+1. The first sampling logic was within the `HIGH_RISK` category, where we applied a per-category cap of `400` for the 14 different harmful categories in the dataset. This was done to ensure category coverage and to prevent a specific type of harmful category from dominating the dataset.
 
 2. Downsample / upsample HIGH_RISK to match LOW_RISK count → ~50/50 balance. 
 
@@ -138,17 +142,17 @@ Following the deduplication and aggregation by prompt, to ensure the curated dat
 | Test | 672 | 493 | 179 | ~73% |
 
 
-#### Pre-processing Step 4: Generating Synthethic Reasoning traces
+### Pre-processing Step 4: Generating Synthetic Reasoning traces
 
-The originial dataset from BeaverTails gives us:
+The original dataset from BeaverTails gives us:
 - prompt
 - response
 - is_safe
 - category
 
-but doesn't gives us the step-by-step safety rationale for why that safety or harmful label was given. 
+but doesn't give us the step-by-step safety rationale for why that safety or harmful label was given. 
 
-However, given that we are working with reasoning models, both CoT and Coconut would require reasoning traces in the training dataset in order to generalize the reasoning behind the elicitation risk for a given prompt. 
+However, given that we are working with reasoning models, both CoT and Coconut would require reasoning traces in the training dataset in order to generalise the reasoning behind the elicitation risk for a given prompt. 
 
 Since the dataset doesn't come with reasoning traces, we had to synthetically generate one using a teacher model; this was done via GPT-4o-mini, conditioned on the ground-truth labels and the harm categories. The generator does not see the paired responses, ensuring it cannot learn information unavailable at inference time. 
 
@@ -170,7 +174,7 @@ Example:
 }
 ```
 
-Furthermore, the reasonong traces were validated against a set of rejection criteria including: label contradiction, mention of observed responses, vague or overlong reasoning. 
+Furthermore, the reasoning traces were validated against a set of rejection criteria including: label contradiction, mention of observed responses, vague or overlong reasoning. 
 
 ---
 
@@ -255,13 +259,13 @@ Any of these outcomes is informative. The staged design ensures the result is in
 | E3 - COCONUT (latent) | stage 1 epoch 1 | 0.6237 | **0.9980** | 0.0056 | 0.43 
 
 
-### Results Summary
+## Detailed Results
  
-### What the Results Show
+### Results Interpretation
 
 **1. Reasoning format has a clear and differentiated effect on classification behaviour,  but not in the direction a simple capability story would predict.**
  
-The three experiments reveal three qualitatively distinct trade-off profiles between HIGH_RISK and LOW_RISK recall. As reasoning moves from none (E1) → explicit (E2) → latent (E3), HIGH_RISK recall increases monotonically (0.88 → 0.92 → 1.00) and LOW_RISK recall decreases monotonically (0.47 → 0.28 → 0.01). Reasoning format does not simply shift performance up or down , it changes what the model attends to.
+The three experiments reveal three qualitatively distinct trade-off profiles between HIGH_RISK and LOW_RISK recall. As reasoning moves from none (E1) → explicit (E2) → latent (E3), HIGH_RISK recall increases monotonically (0.88 → 0.92 → 1.00) and LOW_RISK recall decreases monotonically (0.47 → 0.28 → 0.01). Reasoning format does not simply shift performance up or down, it changes what the model attends to.
  
 **2. E1 (answer-only) shows unstable training dynamics but the best overall balance.**
  
@@ -277,7 +281,7 @@ The latent reasoning model achieves near-perfect HIGH_RISK recall (0.9980) but a
  
 **Note: The result should be read as a scale and configuration finding, not a general claim about latent safety signal.** At 1B parameters with C=3 curriculum stages, latent reasoning does not produce the LOW_RISK discrimination that explicit reasoning and even no-reasoning baselines achieve. Whether this reflects a fundamental limitation or insufficient scale remains an open question.
 
-In the below section, you would detailed information about each experiment and its outcome.
+In the section below, you'll find detailed information about each experiment and its outcome.
 
 ### E1 - Answer-Only Baseline (Complete)
 
@@ -344,7 +348,7 @@ CoT correctly classifies 50 of 179 LOW_RISK examples while maintaining stronger 
 
 ### E3 - COCONUT Latent Reasoning 
 
-> Reasoning is progressively replaced by recurrent passes through the model's continuous hidden states across a staged curriculum (C=3). By the final stage, no explicit reasoning is decoded and the answer is produced from latent thought alone. Implemented from scratch following Hao et al. 2024; 
+> Reasoning is progressively replaced by recurrent passes through the model's continuous hidden states across a staged curriculum (C=3). By the final stage, no explicit reasoning is decoded and the answer is produced from latent thought alone. Implemented from scratch following Hao et al. 2024.
 
 **Curriculum Progression**
  
@@ -356,7 +360,7 @@ CoT correctly classifies 50 of 179 LOW_RISK examples while maintaining stronger 
 | Stage 3 | All steps replaced - fully latent | 
  
 - In Stage 1, the model performs *better* with one latent token than with full explicit reasoning (Stage 0). This may reflect the latent token acting as a compressed, task-relevant representation that is more directly useful for classification than the full verbatim reasoning trace.
-- Validation F1 degrades across Stages 2 and 3 as more reasoning moves into latent space, though it remains above the Stage 0 baseline through Stage 2. Indicating that the model that has learned meaningful latent representations but loses some discriminative signal at full latency.
+- Validation F1 degrades across Stages 2 and 3 as more reasoning moves into latent space, though it remains above the Stage 0 baseline through Stage 2, indicating that the model has learned meaningful latent representations but loses some discriminative signal at full latency.
 
 **Best checkpoint:** stage_1_epoch_1 (val F1: 0.9883 during curriculum training).
  
@@ -399,9 +403,9 @@ The gap between strong curriculum validation performance and near-zero LOW_RISK 
 **Training infrastructure:** 
 
 - Google Colab Pro (T4) for E1/E2
-- RunPod A100 SXM for E3*
+- RunPod A100 SXM for E3
 - Dataset: BeaverTails (CC-BY-NC-4.0) 
-- Model: Llama-3.2-1B (Meta)*
+- Model: Llama-3.2-1B (Meta)
 
 
 ---
@@ -410,9 +414,9 @@ The gap between strong curriculum validation performance and near-zero LOW_RISK 
 
 Beyond the classification metrics, examining the 31 prompts where COCONUT misclassified but CoT correctly classified reveals a consistent pattern: COCONUT reasons at the level of topic categories rather than the specific content of the prompt. A factual question about vodka becomes HIGH_RISK because "alcohol has been associated with unsafe behaviors." A question about seeing a therapist becomes HIGH_RISK because "mental health is a sensitive topic." CoT, by contrast, consistently anchors its reasoning to what the prompt is literally asking and whether that specific request poses realistic elicitation risk.
 
-Three failure patterns emerge across the misclassified cases: topic-to-risk conflation, fabricated prior history of unsafe responses, and over-reliance on what the model *could* say rather than what the prompt is actually asking. A small number of cases sit in genuinely ambiguous territory where neither model's reasoning is fully convincing — and these are arguably the most informative cases for understanding where reasoning format matters most.
+Three failure patterns emerge across the misclassified cases: topic-to-risk conflation, fabricated prior history of unsafe responses, and over-reliance on what the model *could* say rather than what the prompt is actually asking. A small number of cases sit in genuinely ambiguous territory where neither model's reasoning is fully convincing, and these are arguably the most informative cases for understanding where reasoning format matters most.
 
-A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in [QUALITATIVE_ANALYSIS.md](analysis/QUALITATIVE_ANALYSIS.md).
+A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in [QUALITATIVE_ANALYSIS.md](https://github.com/khadijahslawal/latent-watch/blob/main/analysis/QUALITATIVE%20_ANALYSIS.MD).
 
 --- 
 
@@ -436,13 +440,13 @@ A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in 
 
 **Immediate**:
 
-1. Behavioral downstream analysis: Identify and categorize the prompts where CoT succeeds and COCONUT fails. This gives us the narrative for the paper and tells us what kind of reasoning is being lost.
-2. Information-survival analysis: Quantify how many of CoT’s gains over the answer-only baseline are retained by COCONUT. This directly addresses the research question in behavioral terms.
-3. Latent probing: Determine whether the latent representations still contain the safety information that the decoder fails to use. This provides a mechanistic explanation for the behavioral findings.
+1. Behavioural downstream analysis: Identify and categorise the prompts where CoT succeeds and COCONUT fails. This gives us the narrative for the paper and tells us what kind of reasoning is being lost.
+2. Information-survival analysis: Quantify how many of CoT’s gains over the answer-only baseline are retained by COCONUT. This directly addresses the research question in behavioural terms.
+3. Latent probing: Determine whether the latent representations still contain the safety information that the decoder fails to use. This provides a mechanistic explanation for the behavioural findings.
 
 **Longer term**
 
-1. To address the scale question, we should rerun E2 and E3 at Llama-3.1-8B or Qwen3-8B. This helps in understanding if the E3 LOW_RISK collapse persist at larger scale?
+1. To address the scale question, we should rerun E2 and E3 at Llama-3.1-8B or Qwen3-8B. This helps in understanding whether the E3 LOW_RISK collapse persists at larger scale.
 
 2. To look inside E3's representations:
 
@@ -458,7 +462,7 @@ A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in 
 
 - **Chang et al. (arXiv:2606.01243):** Establishes that latent vectors in COCONUT models are semantically meaningful and causally upstream of outputs (§3.2–3.3). We extend their investigation to safety-relevant content.
 - **Hao et al. 2024 (COCONUT):** Original architecture and training curriculum for continuous-thought reasoning models.
-- **Dilgren & Wiegreffe (arXiv:2604.04902):** Independent finding that latent tokens are often causally inert on logical-reasoning tasks-  a motivation for our necessity checks and staged experimental design.
+- **Dilgren & Wiegreffe (arXiv:2604.04902):** Independent finding that latent tokens are often causally inert on logical-reasoning tasks which was a motivation for our necessity checks and staged experimental design.
 - **BeaverTails (Ji et al.):** Prompt-response safety dataset with 14-category harm labels. Primary data source.
 
 ---
