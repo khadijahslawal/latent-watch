@@ -5,6 +5,32 @@
 **Author:** Khadija Shuaib  
 **Project Status:** Active - Pilot Training Completed, Analysis and Latent Probing in Progress
 
+- [Latent Watch](#latent-watch)
+  - [Can Latent Reasoning Be Safety-Monitored?](#can-latent-reasoning-be-safety-monitored)
+  - [The problem](#the-problem)
+  - [Research question](#research-question)
+  - [Why this matters for AI safety](#why-this-matters-for-ai-safety)
+  - [Experimental design](#experimental-design)
+  - [Dataset](#dataset)
+      - [Pre-processing Step 4: Generating Synthethic Reasoning traces](#pre-processing-step-4-generating-synthethic-reasoning-traces)
+  - [Model and training](#model-and-training)
+  - [Latent Watch Results](#latent-watch-results)
+    - [Experimental Setup](#experimental-setup)
+    - [Summary](#summary)
+    - [Results Summary](#results-summary)
+    - [Results Summary](#results-summary-1)
+    - [What the Results Show](#what-the-results-show)
+    - [E1 - Answer-Only Baseline (Complete)](#e1---answer-only-baseline-complete)
+    - [E2 - Chain-of-Thought](#e2---chain-of-thought)
+    - [E3 - COCONUT Latent Reasoning](#e3---coconut-latent-reasoning)
+    - [Curriculum progression (validation F1)](#curriculum-progression-validation-f1)
+  - [Qualitative Analysis](#qualitative-analysis)
+  - [Limitations and caveats](#limitations-and-caveats)
+    - [Next Steps](#next-steps)
+  - [Related work](#related-work)
+  - [Repository structure](#repository-structure)
+  - [Data \& licensing](#data--licensing)
+
 ---
 
 ## The problem
@@ -313,8 +339,6 @@ The answer-only model correctly classifies 84 of 179 LOW_RISK examples making it
  
 CoT correctly classifies 50 of 179 LOW_RISK examples while maintaining stronger HIGH_RISK recall than E1. The explicit reasoning trace supports a more stable training trajectory but anchors the model more strongly toward HIGH_RISK dominance than the no-reasoning baseline.
  
-
- 
  
 ---
 
@@ -380,8 +404,17 @@ The gap between strong curriculum validation performance and near-zero LOW_RISK 
 - Model: Llama-3.2-1B (Meta)*
 
 
-
 ---
+
+## Qualitative Analysis
+
+Beyond the classification metrics, examining the 31 prompts where COCONUT misclassified but CoT correctly classified reveals a consistent pattern: COCONUT reasons at the level of topic categories rather than the specific content of the prompt. A factual question about vodka becomes HIGH_RISK because "alcohol has been associated with unsafe behaviors." A question about seeing a therapist becomes HIGH_RISK because "mental health is a sensitive topic." CoT, by contrast, consistently anchors its reasoning to what the prompt is literally asking and whether that specific request poses realistic elicitation risk.
+
+Three failure patterns emerge across the misclassified cases: topic-to-risk conflation, fabricated prior history of unsafe responses, and over-reliance on what the model *could* say rather than what the prompt is actually asking. A small number of cases sit in genuinely ambiguous territory where neither model's reasoning is fully convincing — and these are arguably the most informative cases for understanding where reasoning format matters most.
+
+A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in [QUALITATIVE_ANALYSIS.md](analysis/QUALITATIVE_ANALYSIS.md).
+
+--- 
 
 ## Limitations and caveats
 
