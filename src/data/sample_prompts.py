@@ -82,29 +82,48 @@ def sample_split(
     high_risk_df = df[df["label"] == "HIGH_RISK"].copy()
     low_risk_df = df[df["label"] == "LOW_RISK"].copy()
 
-    n_high = int(target_size * high_risk_fraction)
-    n_low = target_size - n_high
-
     if split == "train":
         # Per-category cap before global balance
         high_risk_df = _cap_high_risk_by_category(high_risk_df, per_category_cap, random_seed)
 
-    # Sample with replacement only if we need more than available
+    requested_high = int(target_size * high_risk_fraction)
+    requested_low = target_size - requested_high
+
+    #Maintain the requested ratio without sampling with replacement
+    scale = min(
+        1.0, 
+        len(high_risk_df) / requested_high if requested_high else 1.0,
+        len(low_risk_df) / requested_low if requested_low else 1.0
+    )
+
+    n_high = int(requested_high * scale)
+    n_low = int(requested_low * scale)
+
     high_sample = high_risk_df.sample(
-        n=min(n_high, len(high_risk_df)),
-        replace=n_high > len(high_risk_df),
+        n=n_high,
+        replace=False,
         random_state=random_seed,
     )
+
     low_sample = low_risk_df.sample(
-        n=min(n_low, len(low_risk_df)),
-        replace=n_low > len(low_risk_df),
+        n=n_low,
+        replace=False,
         random_state=random_seed,
     )
 
-    result = pd.concat([high_sample, low_sample], ignore_index=True).sample(
-        frac=1, random_state=random_seed
+    result = (
+    pd.concat([high_sample, low_sample], ignore_index=True)
+    .sample(frac=1, random_state=random_seed)
+    .reset_index(drop=True)
     )
 
+    duplicate_count = int(result["prompt"].duplicated().sum())
+
+    if duplicate_count:
+        raise ValueError(
+            f"{split} contains {duplicate_count} duplicate prompt rows after sampling"
+        )
+    
     print(
         f"[{split}] sampled {len(result):,} / {target_size} "
         f"(HIGH_RISK={len(high_sample):,}, LOW_RISK={len(low_sample):,})"

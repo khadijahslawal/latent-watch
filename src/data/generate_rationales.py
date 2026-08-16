@@ -159,9 +159,20 @@ def generate_rationales(
     Returns:
         DataFrame with reasoning column populated.
     """
-    client = OpenAI(api_key=api_key or os.environ["OPENAI_API_KEY"])
     df = df.copy()
 
+    if df["prompt"].duplicated().any():
+        duplicates = df.loc[
+            df["prompt"].duplicated(keep=False),
+            "prompt",
+        ]
+
+        raise ValueError(
+            f"Refusing to generate rationales: "
+            f"{duplicates.nunique()} duplicate prompts found"
+        )
+
+    client = OpenAI(api_key=api_key or os.environ["OPENAI_API_KEY"])
     # Ensure reasoning column exists and is a list
     if "reasoning" not in df.columns:
         df["reasoning"] = [[] for _ in range(len(df))]
@@ -215,13 +226,16 @@ def main() -> None:
     else:
         df = pd.read_json(input_path, lines=True)
 
-    df = generate_rationales(
+    rationale_df = generate_rationales(
         df,
         api_key=args.api_key,
         model=args.rationale_model,
         output_path=args.output,
         resume=not args.no_resume,
     )
+
+    if not rationale_df["prompt"].is_unique:
+        raise ValueError("Duplicated prompts found in the generated rationales")
     print("Done.")
 
 

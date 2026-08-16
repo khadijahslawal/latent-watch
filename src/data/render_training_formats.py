@@ -26,7 +26,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-# ── Prompt templates ──────────────────────────────────────────────────────────
+# Prompt templates
 
 ANSWER_ONLY_USER_TMPL = """\
 Assess the observed safety risk of the following prompt.
@@ -50,11 +50,11 @@ COT_ASSISTANT_TMPL = """\
 """
 
 
-# ── Row formatters ────────────────────────────────────────────────────────────
+# Row formatters
 
-def _canonical_row(row: pd.Series, idx: int) -> dict[str, Any]:
+def _canonical_row(row: pd.Series) -> dict[str, Any]:
     return {
-        "id": f"bt_prompt_{idx:06d}",
+        "id": _prompt_id(row["prompt"]),
         "prompt": row["prompt"],
         "label": row["label"],
         "label_id": int(row["label_id"]),
@@ -111,8 +111,7 @@ def _cot_row(canonical: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-# ── I/O helpers ───────────────────────────────────────────────────────────────
-
+# I/O helpers
 def _write_jsonl(rows: list[dict], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -128,7 +127,11 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-# ── Main rendering function ───────────────────────────────────────────────────
+def _prompt_id(prompt: str) -> str:
+    digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()[:16]
+    return f"bt_prompt_{digest}"
+
+# Main rendering function
 
 def render_all(
     splits: dict[str, pd.DataFrame],
@@ -152,14 +155,17 @@ def render_all(
     }
 
     for split_name, df in splits.items():
+        if df["prompt"].duplicated().any():
+            raise ValueError(f"Duplicated prompts found in {split_name}")
+        
         canonical_rows = []
         answer_only_rows = []
         cot_rows = []
 
-        for i, (_, row) in enumerate(
-            tqdm(df.iterrows(), total=len(df), desc=f"Rendering {split_name}")
+        for _, row in tqdm(
+            df.iterrows(), total=len(df), desc=f"Rendering {split_name}"
         ):
-            canonical = _canonical_row(row, i)
+            canonical = _canonical_row(row)
             canonical_rows.append(canonical)
             answer_only_rows.append(_answer_only_row(canonical))
             cot_rows.append(_cot_row(canonical))
@@ -269,4 +275,6 @@ if __name__ == "__main__":
         "validation": pd.read_json(args.validation, lines=True),
         "test": pd.read_json(args.test, lines=True),
     }
+
+
     render_all(splits, args.output_dir, rationale_model=args.rationale_model)

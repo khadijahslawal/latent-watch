@@ -55,10 +55,25 @@ def build_splits(
     )
 
     splits = {"train": train, "validation": val, "test": test}
-
+    prompt_sets = {}
     for name, split_df in splits.items():
+        # Validate uniqueness after splitting
+        if split_df["prompt"].duplicated().any():
+            raise ValueError(f"Duplicate prompts found within {name} split")
+        # Verify independence across splits
+        if name not in prompt_sets:
+            prompt_sets[name] = set(split_df["prompt"])
+
         print(f"{name}: {len(split_df):,} prompts | label dist:\n{split_df[stratify_col].value_counts().to_dict()}")
 
+    for left, right in [("train", "validation"), ("train", "test"), ("validation", "test"),]:
+        overlap = prompt_sets[left] & prompt_sets[right]
+        if overlap:
+            raise ValueError(f"{len(overlap)} prompts overlap between {left} and {right}")
+
+    
+    print(f"No duplicate prompts found across all splits")
+    print(f"No overlap prompts between different splits")
     return splits
 
 

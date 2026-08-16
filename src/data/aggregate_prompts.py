@@ -80,7 +80,13 @@ def aggregate_prompts(
             }
         )
 
-    return pd.DataFrame(records)
+    #Add uniqueness checks after aggregation
+    result = pd.DataFrame(records)
+
+    if result["prompt"].duplicated().any():
+        raise ValueError("Duplicate normalized prompts found after aggregation")
+
+    return result
 
 
 def save_aggregates(df: pd.DataFrame, output_dir: str | Path) -> Path:
