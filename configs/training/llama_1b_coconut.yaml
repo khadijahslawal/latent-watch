@@ -1,11 +1,13 @@
 model:
-  # COCONUT starts from the CoT checkpoint
-  name_or_path: "checkpoints/llama_1b_cot"
+  # Load the full base model, then continue from E2's trained LoRA adapter.
+  name_or_path: "meta-llama/Llama-3.2-1B-Instruct"
+  cot_adapter_path: "checkpoints/cot/best_adapter"
   load_in_4bit: true
   bnb_4bit_compute_dtype: "bfloat16"
   bnb_4bit_quant_type: "nf4"
 
 lora:
+  # Expected E2 adapter architecture; E3 loads these values from the adapter.
   r: 16
   lora_alpha: 32
   target_modules: ["q_proj", "v_proj", "k_proj", "o_proj"]

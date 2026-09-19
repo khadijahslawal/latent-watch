@@ -37,6 +37,7 @@ from transformers import AutoTokenizer
 
 from training.formatters import USER_PROMPT_TEMPLATE
 from training.lora_utils import load_adapter, load_base_model
+from training.coconut import CoconutWrapper
 
 
 # ── Inference helpers ─────────────────────────────────────────────────────
@@ -124,6 +125,7 @@ def evaluate(
     fp16: bool = True,
     batch_size: int = 8,
     max_new_tokens: int = 256,
+    num_latent_steps: int = 3,
 ) -> pd.DataFrame:
     """Run evaluation on the test set and write results CSV.
 
@@ -160,6 +162,19 @@ def evaluate(
     if len(tokenizer) != base_model.config.vocab_size:
         base_model.resize_token_embeddings(len(tokenizer))
     model = load_adapter(base_model, adapter_dir)
+
+    # Restore the latent-reasoning wrapper for E3 evaluation.
+    if experiment == "latent":
+        bot_token_id = tokenizer.convert_tokens_to_ids("<bot>")
+        eot_token_id = tokenizer.convert_tokens_to_ids("<eot>")
+
+        model = CoconutWrapper(
+            model,
+            bot_token_id=bot_token_id,
+            eot_token_id=eot_token_id,
+            num_latent_steps=num_latent_steps,
+        )
+
     model.eval()
 
     # Token ids for confidence scoring
@@ -192,10 +207,19 @@ def evaluate(
         attention_mask = enc["attention_mask"]
 
         # Confidence scores at next-token distribution
-        high_score, low_score = _get_label_scores(
-            model, input_ids, attention_mask,
-            high_risk_token_id, low_risk_token_id, device,
-        )
+        # For the first correct run, skip those scores for E3:
+        if experiment == "latent":
+            high_score = float("nan")
+            low_score = float("nan")
+        else:
+            high_score, low_score = _get_label_scores(
+                model,
+                input_ids,
+                attention_mask,
+                high_risk_token_id,
+                low_risk_token_id,
+                device,
+            )
 
         # Generate output
         with torch.no_grad():
@@ -205,10 +229,12 @@ def evaluate(
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
                 pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),  # prevent EOS/pad collision
-                eos_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
+                eos_token_id=tokenizer.eos_token_id,
             )
-
-        new_tokens = gen_ids[:, input_ids.shape[1]:]
+            if experiment == "latent":
+                new_tokens = gen_ids
+            else:
+                new_tokens = gen_ids[:, input_ids.shape[1]:]
         raw_output = tokenizer.decode(
             new_tokens[0], skip_special_tokens=True
         ).strip()
@@ -301,10 +327,11 @@ def main() -> None:
     parser.add_argument("--adapter-dir", required=True, help="Path to best_adapter/")
     parser.add_argument("--dataset-dir", required=True, help="Path to split dir (answer_only/ or cot/)")
     parser.add_argument("--output-file", required=True, help="Output CSV path")
-    parser.add_argument("--model-name", default="meta-llama/Llama-3.2-1B")
+    parser.add_argument("--model-name", default="meta-llama/Llama-3.2-1B-Instruct")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--no-4bit", action="store_true")
+    parser.add_argument("--num-latent-steps", type=int, default=3)
     args = parser.parse_args()
 
     evaluate(
@@ -316,6 +343,7 @@ def main() -> None:
         load_in_4bit=not args.no_4bit,
         batch_size=args.batch_size,
         max_new_tokens=args.max_new_tokens,
+        num_latent_steps=args.num_latent_steps,
     )
 
 

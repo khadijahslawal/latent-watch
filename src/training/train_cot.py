@@ -69,7 +69,10 @@ def train_cot(
     """
     cfg = _resolve_hparams(hparams, config_path)
 
-    model_name   = cfg.get("model_name_or_path", "meta-llama/Llama-3.2-1B")
+    model_name   = cfg.get(
+        "name_or_path",
+        cfg.get("model_name_or_path", "meta-llama/Llama-3.2-1B-Instruct"),
+    )
     load_in_4bit = cfg.get("load_in_4bit", True)
     fp16         = cfg.get("fp16", True)
     max_seq_len  = cfg.get("max_seq_length", 512)

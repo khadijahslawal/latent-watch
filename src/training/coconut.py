@@ -27,6 +27,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
+from transformers.modeling_outputs import CausalLMOutput
 
 from src.training.formatters import format_coconut_stage
 
@@ -48,6 +49,7 @@ class CoconutWrapper(nn.Module):
         model: LoRA-patched AutoModelForCausalLM. LoRA must already be attached.
         bot_token_id: Token id of the <bot> special token.
         eot_token_id: Token id of the <eot> special token.
+        num_latent_steps: Number of recurrent latent passes used at inference.
     """
 
     def __init__(
@@ -55,12 +57,114 @@ class CoconutWrapper(nn.Module):
         model: nn.Module,
         bot_token_id: int,
         eot_token_id: int,
+        num_latent_steps: int,
     ):
         super().__init__()
         self.model = model
         self.bot_token_id = bot_token_id
         self.eot_token_id = eot_token_id
+        self.num_latent_steps = num_latent_steps
         self.config = model.config
+
+    def _forward_single(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        labels: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Run one example using its own latent-token positions."""
+
+        # Remove left padding.
+        real_tokens = attention_mask.bool()
+        input_ids = input_ids[real_tokens].unsqueeze(0)
+        labels = labels[real_tokens].unsqueeze(0)
+        attention_mask = torch.ones_like(input_ids)
+
+        bot_positions = (input_ids[0] == self.bot_token_id).nonzero(as_tuple=True)[0]
+
+        # For examples or stages without latent tokens
+        if bot_positions.numel() == 0:
+            output = self.model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                labels=labels,
+            )
+            supervised_tokens = (labels != -100).sum().clamp_min(1)
+            return output.loss, supervised_tokens
+
+        first_bot = bot_positions[0].item()
+        last_bot = bot_positions[-1].item()
+        num_latent = bot_positions.numel()
+
+        expected_positions = torch.arange(
+            first_bot,
+            last_bot + 1,
+            device=bot_positions.device,
+        )
+        if not torch.equal(bot_positions, expected_positions):
+            raise ValueError(
+                "Expected contiguous <bot> tokens, but found positions "
+                f"{bot_positions.tolist()}"
+            )
+
+        prefix_ids = input_ids[:, :first_bot]
+        prefix_mask = attention_mask[:, :first_bot]
+
+        suffix_ids = input_ids[:, last_bot + 1:]
+        suffix_mask = attention_mask[:, last_bot + 1:]
+        suffix_labels = labels[:, last_bot + 1:]
+
+        embed_layer = self.model.get_input_embeddings()
+        current_embeds = embed_layer(prefix_ids)
+        current_mask = prefix_mask
+
+        for _ in range(num_latent):
+            output = self.model(
+                inputs_embeds=current_embeds,
+                attention_mask=current_mask,
+                output_hidden_states=True,
+                use_cache=False,
+            )
+
+            latent_hidden = output.hidden_states[-1][:, -1:, :]
+
+            current_embeds = torch.cat([current_embeds, latent_hidden], dim=1)
+            current_mask = torch.cat(
+                [
+                    current_mask,
+                    torch.ones(
+                        (1, 1),
+                        dtype=current_mask.dtype,
+                        device=current_mask.device,
+                    ),
+                ],
+                dim=1,
+            )
+
+        suffix_embeds = embed_layer(suffix_ids)
+
+        full_embeds = torch.cat([current_embeds, suffix_embeds], dim=1)
+        full_mask = torch.cat([current_mask, suffix_mask], dim=1)
+
+        masked_prefix_labels = torch.full(
+            (1, current_embeds.shape[1]),
+            -100,
+            dtype=labels.dtype,
+            device=labels.device,
+        )
+        full_labels = torch.cat(
+            [masked_prefix_labels, suffix_labels],
+            dim=1,
+        )
+
+        output = self.model(
+            inputs_embeds=full_embeds,
+            attention_mask=full_mask,
+            labels=full_labels,
+        )
+
+        supervised_tokens = (full_labels != -100).sum().clamp_min(1)
+        return output.loss, supervised_tokens
 
     def forward(
         self,
@@ -83,116 +187,77 @@ class CoconutWrapper(nn.Module):
         Returns:
             ModelOutput with .loss computed on non-(-100) label positions.
         """
-        device = input_ids.device
-        batch_size, seq_len = input_ids.shape
 
-        # Find <bot> positions in the sequence (same for all items in batch)
-        # We assume the curriculum ensures bot tokens are contiguous after the prompt
-        bot_mask = (input_ids == self.bot_token_id)  # (batch, seq_len)
-        has_latent = bot_mask.any()
+        weighted_losses = []
+        token_counts = []
 
-        if not has_latent:
-            # Stage 0 or no latent tokens: standard forward pass
-            return self.model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                labels=labels,
+        for row_index in range(input_ids.shape[0]):
+            row_loss, supervised_tokens = self._forward_single(
+                input_ids=input_ids[row_index],
+                attention_mask=attention_mask[row_index],
+                labels=labels[row_index],
             )
 
-        # ── Latent recurrence ─────────────────────────────────────────────
-        # Split sequence at first <bot> token
-        # Everything before first <bot> = prefix (input + explicit context)
-        # <bot> positions = latent slots
-        # Everything after last <bot> = explicit suffix (remaining reasoning + answer)
-
-        # Get the position of the first <bot> in the sequence
-        # (assumed same across batch items in a given training batch)
-        bot_positions = bot_mask[0].nonzero(as_tuple=True)[0]
-        first_bot = bot_positions[0].item()
-        last_bot = bot_positions[-1].item()
-        num_latent = len(bot_positions)
-
-        prefix_ids = input_ids[:, :first_bot]
-        prefix_mask = attention_mask[:, :first_bot]
-        suffix_ids = input_ids[:, last_bot + 1:]
-        suffix_labels = labels[:, last_bot + 1:]
-
-        # Step 1: Run prefix to get hidden states
-        embed_layer = self.model.get_input_embeddings()
-
-        prefix_embeds = embed_layer(prefix_ids)  # (batch, prefix_len, hidden)
-
-        # Iteratively feed hidden state back for each latent slot
-        current_embeds = prefix_embeds
-        current_mask = prefix_mask
-
-        for _ in range(num_latent):
-            outputs = self.model(
-                inputs_embeds=current_embeds,
-                attention_mask=current_mask,
-                output_hidden_states=True,
+            weighted_losses.append(
+                row_loss * supervised_tokens.to(row_loss.dtype)
             )
-            # Last hidden state at final position = latent thought vector
-            latent_hidden = outputs.hidden_states[-1][:, -1:, :]  # (batch, 1, hidden)
+            token_counts.append(supervised_tokens)
 
-            # Append latent hidden state as next "token embedding"
-            current_embeds = torch.cat([current_embeds, latent_hidden], dim=1)
-            current_mask = torch.cat([
-                current_mask,
-                torch.ones(batch_size, 1, dtype=torch.long, device=device),
-            ], dim=1)
+        total_weighted_loss = torch.stack(weighted_losses).sum()
+        total_supervised_tokens = torch.stack(token_counts).sum()
 
-        # Step 2: Append suffix embeddings
-        if suffix_ids.shape[1] > 0:
-            suffix_embeds = embed_layer(suffix_ids)
-            full_embeds = torch.cat([current_embeds, suffix_embeds], dim=1)
-            full_mask = torch.cat([
-                current_mask,
-                attention_mask[:, last_bot + 1:],
-            ], dim=1)
-        else:
-            full_embeds = current_embeds
-            full_mask = current_mask
-
-        # Step 3: Build labels — mask prefix and latent positions, supervise suffix
-        prefix_labels = torch.full(
-            (batch_size, current_embeds.shape[1]),
-            -100,
-            dtype=torch.long,
-            device=device,
+        batch_loss = (
+            total_weighted_loss / total_supervised_tokens.to(total_weighted_loss.dtype)
         )
-        if suffix_ids.shape[1] > 0:
-            full_labels = torch.cat([prefix_labels, suffix_labels], dim=1)
-        else:
-            full_labels = prefix_labels
 
-        # Step 4: Final forward pass with full sequence
-        return self.model(
-            inputs_embeds=full_embeds,
-            attention_mask=full_mask,
-            labels=full_labels,
+        return CausalLMOutput(
+            loss=batch_loss,
+            logits=None,
         )
 
     def generate(self, input_ids: torch.Tensor, attention_mask: torch.Tensor, **kwargs):
-        """Inference: run latent passes silently, then generate the answer token.
+        """Inference: Prompt → latent pass 1 → ... → latent pass N → answer.
 
-        The latent thought tokens do not produce readable output.
-        The model generates the <answer>LABEL</answer> suffix.
+        At inference the prompt contains no <bot> tokens, so the recurrent
+        latent steps are driven explicitly here (mirroring forward()): the
+        prompt is embedded, then each of num_latent_steps passes feeds the
+        previous pass's final hidden state back in as the next input
+        embedding. The accumulated embeddings then seed self.model.generate()
+        to produce the <answer>LABEL</answer> suffix.
         """
-        # At inference we don't have <bot> tokens in input — we run the base
-        # model directly and let it generate. The latent behaviour is only
-        # meaningful when the model has been trained to produce latent states.
-        #print("DEBUG: CoconutWrapper.generate IS being called")
-        #print(f"DEBUG generate called: pad_token_id in kwargs={('pad_token_id' in kwargs)}, eot_token_id={self.eot_token_id}")
-        #print(f"DEBUG input_ids shape={input_ids.shape}, first row last 5 tokens={input_ids[0, -5:].tolist()}")
-        kwargs["pad_token_id"] = self.eot_token_id
-        kwargs["eos_token_id"] = self.eot_token_id
-        kwargs["do_sample"] = False
-        #print(f"DEBUG kwargs after fix: pad_token_id={kwargs.get('pad_token_id')}, eos_token_id={kwargs.get('eos_token_id')}")
-        #out = self.model.generate(input_ids=input_ids, attention_mask=attention_mask, **kwargs)
-        #print(f"DEBUG generate output first row first 10 tokens: {out[0, input_ids.shape[1]:input_ids.shape[1]+10].tolist()}")
-        #return out
-        return self.model.generate(input_ids=input_ids, attention_mask=attention_mask, **kwargs) 
+        kwargs.setdefault("pad_token_id", self.eot_token_id)
+        kwargs.setdefault("eos_token_id", self.model.config.eos_token_id)
+        kwargs.setdefault("do_sample", False)
+
+        embed_layer = self.model.get_input_embeddings()
+        current_embeds = embed_layer(input_ids)
+        current_mask = attention_mask
+
+        with torch.no_grad():
+            for _ in range(self.num_latent_steps):
+                outputs = self.model(
+                    inputs_embeds=current_embeds,
+                    attention_mask=current_mask,
+                    output_hidden_states=True,
+                    use_cache=False,
+                )
+                # Last hidden state at final position = latent thought vector
+                latent_hidden = outputs.hidden_states[-1][:, -1:, :]
+
+                current_embeds = torch.cat([current_embeds, latent_hidden], dim=1)
+                current_mask = torch.cat([
+                    current_mask,
+                    torch.ones(
+                        current_mask.shape[0], 1,
+                        dtype=torch.long, device=current_mask.device,
+                    ),
+                ], dim=1)
+
+        return self.model.generate(
+            inputs_embeds=current_embeds,
+            attention_mask=current_mask,
+            **kwargs,
+        )
 
     # Delegate parameter access to inner model for PEFT compatibility
     def parameters(self, recurse: bool = True):

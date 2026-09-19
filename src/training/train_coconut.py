@@ -8,9 +8,9 @@ Implements the staged curriculum from Hao et al. 2024:
 LoRA + COCONUT ordering (enforced here):
   1. Load base model
   2. Add <bot>/<eot> tokens + resize embeddings  ← BEFORE LoRA
-  3. Attach LoRA to base model
+  3. Load the trained E2 LoRA adapter as trainable
   4. Wrap in CoconutWrapper
-  5. Run curriculum training
+  5. Continue with curriculum stages 1..C
 
 Entry points:
   - Called from notebooks/04_train_pilot.ipynb (Colab)
@@ -27,10 +27,11 @@ from typing import Any
 
 import torch
 import yaml
+from peft import PeftModel
+from sklearn.metrics import f1_score
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from transformers import get_cosine_schedule_with_warmup
-from sklearn.metrics import f1_score
+from transformers import GenerationConfig, get_cosine_schedule_with_warmup
 
 from training.coconut import (
     BOT_TOKEN,
@@ -39,11 +40,9 @@ from training.coconut import (
     add_coconut_tokens,
 )
 from training.lora_utils import (
-    attach_lora,
     load_base_model,
     save_adapter_with_tokenizer,
 )
-
 
 def _load_jsonl(path: str | Path) -> list[dict[str, Any]]:
     rows = []
@@ -119,28 +118,35 @@ def _evaluate_f1(
                     y_true.append(0)
                 else:
                     y_true.append(-1)
-            outputs = model.generate(
-                input_ids=generation_input_ids,
-                attention_mask=generation_attention_mask,
-                max_new_tokens=200,
-                do_sample=False,
-                pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
-                eos_token_id=tokenizer.eos_token_id,
-            )
-            new_tokens = outputs[:, generation_input_ids.shape[1]:]
-            if len(y_pred) == 0:
-                print("DEBUG raw token ids:", new_tokens[0][:20].tolist())
-                print(
-                    "DEBUG decoded:",
-                    repr(
-                        tokenizer.decode(
-                            new_tokens[0], skip_special_tokens=False
-                        )[:300]
-                    ),
+            # Generate one example at a time using each row's real (unpadded)
+            # prompt tokens — the left-padding stored in generation_input_ids
+            # is only there so the batch can be torch.stack'd, and must be
+            # stripped before it reaches the model's latent-pass loop.
+            for i in range(generation_input_ids.shape[0]):
+                real = generation_attention_mask[i].bool()
+                prompt_ids = generation_input_ids[i][real].unsqueeze(0)
+                prompt_mask = generation_attention_mask[i][real].unsqueeze(0)
+
+                new_tokens = model.generate(
+                    input_ids=prompt_ids,
+                    attention_mask=prompt_mask,
+                    max_new_tokens=200,
+                    do_sample=False,
+                    pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
+                    eos_token_id=tokenizer.eos_token_id,
                 )
-            for i in range(new_tokens.shape[0]):
+                if len(y_pred) == 0:
+                    print("DEBUG raw token ids:", new_tokens[0][:20].tolist())
+                    print(
+                        "DEBUG decoded:",
+                        repr(
+                            tokenizer.decode(
+                                new_tokens[0], skip_special_tokens=False
+                            )[:300]
+                        ),
+                    )
                 text = tokenizer.decode(
-                    new_tokens[i], skip_special_tokens=True
+                    new_tokens[0], skip_special_tokens=True
                 ).strip()
                 y_pred.append(1 if "HIGH_RISK" in text else (0 if "LOW_RISK" in text else -1))
 
@@ -176,7 +182,16 @@ def train_coconut(
     """
     cfg = _resolve_hparams(hparams, config_path)
 
-    model_name    = cfg.get("model_name_or_path", "meta-llama/Llama-3.2-1B")
+    model_name    = cfg.get(
+        "name_or_path",
+        cfg.get("model_name_or_path", "meta-llama/Llama-3.2-1B-Instruct"),
+    )
+
+    cot_adapter_path = cfg.get("cot_adapter_path")
+    if not cot_adapter_path:
+        raise ValueError(
+            "E3 requires model.cot_adapter_path pointing to E2's best_adapter"
+        )
     load_in_4bit  = cfg.get("load_in_4bit", True)
     fp16          = cfg.get("fp16", True)
     max_seq_len   = cfg.get("max_seq_length", 512)
@@ -184,12 +199,12 @@ def train_coconut(
     grad_accum    = cfg.get("gradient_accumulation_steps", 8)
     lr            = cfg.get("learning_rate", 1e-4)
     warmup_ratio  = cfg.get("warmup_ratio", 0.05)
-    lora_r        = cfg.get("lora_r", 16)
-    lora_alpha    = cfg.get("lora_alpha", 32)
-    lora_dropout  = cfg.get("lora_dropout", 0.05)
-    target_mods   = cfg.get("target_modules", ["q_proj", "v_proj"])
     num_stages    = cfg.get("num_coconut_stages", 3)
     epochs_per_stage = cfg.get("epochs_per_stage", 1)
+    if num_stages < 1:
+        raise ValueError("num_coconut_stages must be at least 1")
+    if epochs_per_stage < 1:
+        raise ValueError("epochs_per_stage must be at least 1")
 
     dataset_dir = Path(dataset_dir)
     out = Path(output_dir)
@@ -217,23 +232,25 @@ def train_coconut(
     # ── Step 2: Add special tokens + resize BEFORE LoRA ──────────────────
     bot_token_id, eot_token_id = add_coconut_tokens(tokenizer, model)
 
-    # ── Step 3: Attach LoRA to base model ────────────────────────────────
-    model = attach_lora(
+    # ── Step 3: Restore the trainable E2 LoRA adapter ────────────────────
+    model = PeftModel.from_pretrained(
         model,
-        r=lora_r,
-        lora_alpha=lora_alpha,
-        lora_dropout=lora_dropout,
-        target_modules=target_mods,
+        cot_adapter_path,
+        is_trainable=True,
     )
 
     # ── Step 4: Wrap in COCONUT ───────────────────────────────────────────
-    coconut_model = CoconutWrapper(model, bot_token_id=bot_token_id, eot_token_id=eot_token_id)
-    from transformers import GenerationConfig
+    coconut_model = CoconutWrapper(
+        model,
+        bot_token_id=bot_token_id,
+        eot_token_id=eot_token_id,
+        num_latent_steps=num_stages,
+    )
     coconut_model.model.generation_config = GenerationConfig(
-      bos_token_id=128000,
-      eos_token_id=eot_token_id,
-      pad_token_id=eot_token_id,
-      do_sample=False,
+        bos_token_id=tokenizer.bos_token_id,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=eot_token_id,
+        do_sample=False,
     )
     # ── Load data ─────────────────────────────────────────────────────────
     train_rows = _load_jsonl(dataset_dir / "train.jsonl")
@@ -254,7 +271,7 @@ def train_coconut(
     total_batches_per_stage = (
         (len(train_rows) // batch_size) // grad_accum
     ) * epochs_per_stage
-    total_steps = total_batches_per_stage * (num_stages + 1)
+    total_steps = total_batches_per_stage * (num_stages)
     warmup_steps = int(total_steps * warmup_ratio)
     scheduler = get_cosine_schedule_with_warmup(
         optimizer,
@@ -262,7 +279,9 @@ def train_coconut(
         num_training_steps=total_steps,
     )
 
-    for stage in range(num_stages + 1):
+    for stage in range(1, num_stages + 1):
+        # Match validation-time latent passes to the current curriculum stage.
+        coconut_model.num_latent_steps = stage
         print(f"\n{'─' * 50}")
         print(f"Curriculum Stage {stage}/{num_stages}")
         if stage == 0:
@@ -336,8 +355,8 @@ def train_coconut(
                 "stage": stage, "epoch": epoch,
                 "train_loss": avg_loss, "val_f1": val_f1,
             })
-
-            if val_f1 > best_f1:
+            # Only a fully latent checkpoint can become the final E3 adapter.
+            if stage == num_stages and val_f1 > best_f1:
                 best_f1 = val_f1
                 best_ckpt_dir = ckpt_dir
                 print(f"  ↑ New best (val F1={best_f1:.4f}) → {best_ckpt_dir}")
