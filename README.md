@@ -67,7 +67,7 @@ This project investigates whether an alternative is possible: We are essentially
 
 ## Experimental design
 
-The core experiment trains three LoRA adapters on Llama-3.2-1B, one for each reasoning format, on a shared safety classification task. All else is held equal.
+The core experiment trains E1 and E2 from the same Llama-3.2-1B-Instruct checkpoint. E3 then continues from E2's trained LoRA adapter using the COCONUT curriculum. All experiments use the same safety-classification data lineage.
 
 **Key Task:** Given a prompt, predict its observed safety risk.  
 - `HIGH_RISK`: at least one observed response to the prompt was unsafe  
@@ -199,11 +199,11 @@ lr_scheduler = cosine, warmup_ratio = 0.05, max_seq_length = 512
 
 Loss is masked to target tokens only; prompt tokens are set to `-100`.
 
-**COCONUT-specific:** E3 uses a staged curriculum (C=3 stages) implementing Hao et al.'s progressive replacement schedule. The LoRA adapter is attached to the base model before COCONUT wrapping; gradients flow back through the wrapper into the adapters. Two special tokens are added: `<bot>` (beginning of latent thought) and `<eot>` (end of latent thought).
+**COCONUT-specific:** E2 supplies stage 0 (explicit CoT). E3 loads that LoRA adapter as trainable and runs stages 1 through C, progressively replacing explicit reasoning with latent states. Gradients flow back through the COCONUT wrapper into the adapter. Two special tokens are added: `<bot>` (beginning of latent thought) and `<eot>` (end of latent thought).
 
 **Curriculum:**
 ```
-Stage 0: <reasoning> step1 step2 step3 </reasoning> <answer>LABEL</answer>
+Stage 0 (E2 checkpoint): <reasoning> step1 step2 step3 </reasoning> <answer>LABEL</answer>
 Stage 1: <bot> step2 step3 <answer>LABEL</answer>
 Stage 2: <bot><bot> step3 <answer>LABEL</answer>
 Stage 3: <bot><bot><bot> <answer>LABEL</answer>
