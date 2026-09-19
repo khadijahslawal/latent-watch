@@ -102,6 +102,10 @@ def _evaluate_f1(
             input_ids     = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels        = batch["labels"].to(device)
+            generation_input_ids = batch["generation_input_ids"].to(device)
+            generation_attention_mask = batch[
+                "generation_attention_mask"
+            ].to(device)
 
             for label_row in labels:
                 valid = label_row[label_row != -100]
@@ -116,29 +120,40 @@ def _evaluate_f1(
                 else:
                     y_true.append(-1)
             outputs = model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
+                input_ids=generation_input_ids,
+                attention_mask=generation_attention_mask,
                 max_new_tokens=200,
                 do_sample=False,
                 pad_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
                 eos_token_id=tokenizer.eos_token_id,
             )
-            new_tokens = outputs[:, input_ids.shape[1]:]
+            new_tokens = outputs[:, generation_input_ids.shape[1]:]
             if len(y_pred) == 0:
                 print("DEBUG raw token ids:", new_tokens[0][:20].tolist())
-                token_row = new_tokens[0]
-                valid_tokens = token_row[token_row != tokenizer.pad_token_id]
-                print("DEBUG decoded:", repr(tokenizer.decode(valid_tokens, skip_special_tokens=False)[:300]))
+                print(
+                    "DEBUG decoded:",
+                    repr(
+                        tokenizer.decode(
+                            new_tokens[0], skip_special_tokens=False
+                        )[:300]
+                    ),
+                )
             for i in range(new_tokens.shape[0]):
-                token_row = new_tokens[i]
-                valid_tokens = token_row[token_row != tokenizer.pad_token_id]
-                text = tokenizer.decode(valid_tokens, skip_special_tokens=True).strip()
+                text = tokenizer.decode(
+                    new_tokens[i], skip_special_tokens=True
+                ).strip()
                 y_pred.append(1 if "HIGH_RISK" in text else (0 if "LOW_RISK" in text else -1))
 
     pairs = [(t, p) for t, p in zip(y_true, y_pred) if t != -1]
     if not pairs:
         return 0.0
     yt, yp = zip(*pairs)
+    invalid_predictions = sum(prediction == -1 for prediction in yp)
+    if invalid_predictions:
+        print(
+            "Validation outputs without a parseable label: "
+            f"{invalid_predictions}/{len(yp)}"
+        )
     return f1_score(list(yt), list(yp), average="weighted", zero_division=0)
 
 

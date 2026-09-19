@@ -289,6 +289,24 @@ class CoconutCurriculumDataset(Dataset):
         input_ids = tok(input_text, add_special_tokens=True, return_tensors="pt").input_ids.squeeze(0)
         target_ids = tok(target_text, add_special_tokens=False, return_tensors="pt").input_ids.squeeze(0)
 
+        # Keep a separate prompt-only sequence for generation-based validation.
+        # The supervised input below contains prompt + target and must never be
+        # passed directly to generate(), or the ground-truth target leaks in.
+        prompt_ids = input_ids[: self.max_seq_length]
+        prompt_attention_mask = torch.ones(len(prompt_ids), dtype=torch.long)
+        prompt_pad_len = self.max_seq_length - len(prompt_ids)
+        if prompt_pad_len > 0:
+            prompt_ids = torch.cat([
+                torch.full(
+                    (prompt_pad_len,), tok.pad_token_id, dtype=torch.long
+                ),
+                prompt_ids,
+            ])
+            prompt_attention_mask = torch.cat([
+                torch.zeros(prompt_pad_len, dtype=torch.long),
+                prompt_attention_mask,
+            ])
+
         full_ids = torch.cat([input_ids, target_ids], dim=0)
 
         # Build labels: mask prompt, supervise target but mask <bot> positions
@@ -314,7 +332,13 @@ class CoconutCurriculumDataset(Dataset):
             labels = torch.cat([torch.full((pad_len,), -100, dtype=torch.long), labels])
             attention_mask = torch.cat([torch.zeros(pad_len, dtype=torch.long), attention_mask])
 
-        return {"input_ids": full_ids, "attention_mask": attention_mask, "labels": labels}
+        return {
+            "input_ids": full_ids,
+            "attention_mask": attention_mask,
+            "labels": labels,
+            "generation_input_ids": prompt_ids,
+            "generation_attention_mask": prompt_attention_mask,
+        }
 
     def __len__(self) -> int:
         return len(self.samples)

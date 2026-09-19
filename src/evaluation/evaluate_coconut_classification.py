@@ -208,12 +208,10 @@ def evaluate(
                 eos_token_id=tokenizer.convert_tokens_to_ids("<eot>"),
             )
 
-        # REPLACE WITH
-        # WITH
         new_tokens = gen_ids[:, input_ids.shape[1]:]
-        token_row = new_tokens[0]
-        valid_tokens = token_row[token_row != tokenizer.pad_token_id]
-        raw_output = tokenizer.decode(valid_tokens, skip_special_tokens=True).strip()
+        raw_output = tokenizer.decode(
+            new_tokens[0], skip_special_tokens=True
+        ).strip()
 
         # Extract prediction
         generated_reasoning = None

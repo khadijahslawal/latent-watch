@@ -124,6 +124,44 @@ def collate_fn(batch: list[dict]) -> dict[str, torch.Tensor]:
 
 # ── Evaluation helper ─────────────────────────────────────────────────────
 
+def _prepare_prompt_only_batch(
+    input_ids: torch.Tensor,
+    attention_mask: torch.Tensor,
+    labels: torch.Tensor,
+    pad_token_id: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Recover and left-pad prompt-only inputs from a supervised batch.
+
+    ``PromptRiskDataset`` stores ``prompt + target`` for teacher-forced loss.
+    Generation-based validation must not feed that target back to the model.
+    Prompt positions are the attended positions whose labels are masked with
+    ``-100``; padding positions are excluded by ``attention_mask``.
+    """
+    prompt_rows = []
+    for token_row, mask_row, label_row in zip(input_ids, attention_mask, labels):
+        prompt_mask = mask_row.bool() & label_row.eq(-100)
+        prompt_tokens = token_row[prompt_mask]
+        if prompt_tokens.numel() == 0:
+            raise ValueError("Validation example contains no prompt tokens")
+        prompt_rows.append(prompt_tokens)
+
+    max_prompt_length = max(row.numel() for row in prompt_rows)
+    prompt_input_ids = input_ids.new_full(
+        (len(prompt_rows), max_prompt_length),
+        pad_token_id,
+    )
+    prompt_attention_mask = attention_mask.new_zeros(
+        (len(prompt_rows), max_prompt_length)
+    )
+
+    for index, prompt_tokens in enumerate(prompt_rows):
+        prompt_length = prompt_tokens.numel()
+        prompt_input_ids[index, -prompt_length:] = prompt_tokens
+        prompt_attention_mask[index, -prompt_length:] = 1
+
+    return prompt_input_ids, prompt_attention_mask
+
+
 def evaluate_weighted_f1(
     model,
     dataloader: DataLoader,
@@ -145,9 +183,6 @@ def evaluate_weighted_f1(
     """
     if label_map is None:
         label_map = {"HIGH_RISK": 1, "LOW_RISK": 0}
-
-    high_risk_id = tokenizer.encode("HIGH_RISK", add_special_tokens=False)[0]
-    low_risk_id = tokenizer.encode("LOW_RISK", add_special_tokens=False)[0]
 
     model.eval()
     y_true, y_pred = [], []
@@ -174,22 +209,29 @@ def evaluate_weighted_f1(
                     y_true.append(-1)
 
 
-            # AFTER
+            prompt_input_ids, prompt_attention_mask = _prepare_prompt_only_batch(
+                input_ids,
+                attention_mask,
+                labels,
+                tokenizer.pad_token_id,
+            )
+
             outputs = model.generate(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                max_new_tokens=200,        # enough for CoT reasoning + answer tag
+                input_ids=prompt_input_ids,
+                attention_mask=prompt_attention_mask,
+                max_new_tokens=200,
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id,
             )
-            new_tokens = outputs[:, input_ids.shape[1]:]
+            new_tokens = outputs[:, prompt_input_ids.shape[1]:]
 
             for i in range(new_tokens.shape[0]):
-                # Strip leading pad tokens before decoding
-                row = new_tokens[i]
-                mask = row != tokenizer.pad_token_id
-                valid = row[mask]
-                text = tokenizer.decode(valid, skip_special_tokens=True).strip()
+                # Decode only tokens generated after the prompt. Do not filter by
+                # pad_token_id: some causal LMs intentionally use EOS as PAD.
+                text = tokenizer.decode(
+                    new_tokens[i], skip_special_tokens=True
+                ).strip()
                 if len(y_pred) < 3:
                     print(f"DEBUG [{i}]: {repr(text[:200])}")
                 if "HIGH_RISK" in text:
@@ -204,6 +246,12 @@ def evaluate_weighted_f1(
     if not pairs:
         return 0.0
     yt, yp = zip(*pairs)
+    invalid_predictions = sum(prediction == -1 for prediction in yp)
+    if invalid_predictions:
+        print(
+            "Validation outputs without a parseable label: "
+            f"{invalid_predictions}/{len(yp)}"
+        )
     return f1_score(list(yt), list(yp), average="weighted", zero_division=0)
 
 
