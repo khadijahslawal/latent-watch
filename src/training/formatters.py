@@ -115,11 +115,14 @@ def format_coconut_stage(
         )
     elif stage >= num_stages:
         # All reasoning replaced — only latent tokens + answer
-        latent_tokens = " ".join([bot_token] * num_stages)
+        # Keep latent slots adjacent. A space between special tokens can become
+        # an ordinary tokenizer token and break the wrapper's contiguous-slot
+        # invariant.
+        latent_tokens = bot_token * num_stages
         target_text = f"{latent_tokens} <answer>{label}</answer>"
     else:
         # Replace first `stage` reasoning sentences with latent tokens
-        latent_tokens = " ".join([bot_token] * stage)
+        latent_tokens = bot_token * stage
         remaining_steps = reasoning_steps[stage:]
         remaining_text = "\n".join(remaining_steps)
         target_text = (
