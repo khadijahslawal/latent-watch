@@ -471,52 +471,43 @@ A full case-by-case breakdown with COCONUT and CoT reasoning side by side is in 
 
 ```
 latent-watch/
-├── README.md
 ├── ATTRIBUTION.md
+├── LICENSE
+├── README.md
 ├── pyproject.toml
+├── requirements.txt
+│
+├── analysis/
+│   └── QUALITATIVE _ANALYSIS.MD
 │
 ├── configs/
-│   ├── data/beavertails_risk.yaml
+│   ├── data/
+│   │   └── beavertails_risk.yaml
 │   ├── training/
 │   │   ├── llama_1b_answer_only.yaml
 │   │   ├── llama_1b_cot.yaml
 │   │   └── llama_1b_coconut.yaml
-│   └── evaluation/safety_risk.yaml
+│   └── evaluation/
+│       └── safety_risk.yaml
 │
-├── data/processed/beavertails_risk_v1/
-│   ├── canonical/{train,validation,test}.jsonl
-│   ├── answer_only/{train,validation,test}.jsonl
-│   ├── cot/{train,validation,test}.jsonl      # COCONUT reads from here too
-│   └── challenge/matched_context_test.jsonl
-│
-├── src/latent_watch/
-│   ├── data/          # load, normalize, aggregate, split, generate rationales
-│   ├── training/      # base_trainer, formatters, lora_utils, coconut, train_*.py
-│   └── evaluation/    # classification, category, matched-pairs, latent-steps
-│
-├── checkpoints/
-│   ├── answer_only/best_adapter/
-│   ├── cot/best_adapter/
-│   └── coconut/best_adapter/   # includes tokenizer with <bot>/<eot>
-│
-├── results/
-│   ├── answer_only.csv
-│   ├── cot.csv
-│   └── latent.csv
+├── data/
+│   ├── README.md
+│   └── beavertails_to_schema.py
 │
 ├── notebooks/
-│   ├── 01_dataset_audit.ipynb
-│   ├── 02_sampling_review.ipynb
-│   ├── 03_rationale_review.ipynb
-│   └── 04_train_pilot.ipynb    # Colab T4 entry point
+│   ├── Latent_Watch_Data_Processing_Pipeline.ipynb
+│   └── Latent_Watch_Post_Training_Eval_Pipeline.ipynb
 │
-└── tests/
-    ├── test_aggregation.py
-    ├── test_any_unsafe_rule.py
-    ├── test_split_leakage.py
-    ├── test_category_sampling.py
-    └── test_rendered_formats.py
+└── src/
+    ├── data/          # aggregation, splitting, rationales, validation, rendering
+    ├── evaluation/    # standard and COCONUT classification evaluation
+    └── training/      # formatters, LoRA utilities, trainers, COCONUT wrapper
 ```
+
+Generated datasets (`data/interim/` and `data/processed/`) and model
+checkpoints are intentionally excluded from Git. The current experiment keeps
+those artifacts under its Google Drive run directory; the evaluation notebook
+writes result CSVs there as well.
 
 ---
 
