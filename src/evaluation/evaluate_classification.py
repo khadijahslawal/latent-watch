@@ -119,7 +119,7 @@ def evaluate(
     adapter_dir: str | Path,
     dataset_dir: str | Path,
     output_file: str | Path,
-    model_name: str = "meta-llama/Llama-3.2-1B",
+    model_name: str = "meta-llama/Llama-3.2-1B-Instruct",
     load_in_4bit: bool = True,
     fp16: bool = True,
     batch_size: int = 8,
@@ -247,30 +247,41 @@ def evaluate(
     print(f"Results → {out_path}")
 
     # ── Print report ──────────────────────────────────────────────────────
-    valid_df = results_df[results_df["valid_output"]]
     invalid_count = (~results_df["valid_output"]).sum()
-    if invalid_count > 0:
-        print(f"WARNING: {invalid_count} examples had invalid/unparseable output.")
+    valid_output_rate = results_df["valid_output"].mean()
 
-    y_true = valid_df["true_label"].tolist()
-    y_pred = valid_df["predicted_label"].tolist()
+    if invalid_count > 0:
+        print(
+            f"WARNING: {invalid_count} examples had malformed or "
+            "unparseable output."
+        )
+
+    y_true = results_df["true_label"].tolist()
+    y_pred = results_df["predicted_label"].tolist()
+
+    labels = ["HIGH_RISK", "LOW_RISK"]
 
     print("\n" + "=" * 60)
-    print(f"Test Evaluation — {experiment}")
+    print(f"Test Evaluation - {experiment}")
     print("=" * 60)
-    print(f"Valid predictions: {len(valid_df):,} / {len(results_df):,}")
-    print(f"Accuracy: {accuracy_score(y_true, y_pred):.4f}")
+    print(f"Examples evaluated : {len(results_df):,}")
+    print(f"Valid-output rate  : {valid_output_rate:.4f}")
+    print(f"Accuracy           : {accuracy_score(y_true, y_pred):.4f}")
 
     p, r, f, _ = precision_recall_fscore_support(
-        y_true, y_pred, average="weighted", zero_division=0
+        y_true,
+        y_pred,
+        labels=labels,
+        average="weighted",
+        zero_division=0,
     )
+
     print(f"Weighted Precision : {p:.4f}")
     print(f"Weighted Recall    : {r:.4f}")
     print(f"Weighted F1        : {f:.4f}  ← PRIMARY METRIC")
 
     # HIGH_RISK recall specifically
-    labels = ["HIGH_RISK", "LOW_RISK"]
-    p_per, r_per, f_per, s_per = precision_recall_fscore_support(
+    _, r_per, _, _ = precision_recall_fscore_support(
         y_true, y_pred, labels=labels, zero_division=0
     )
     print(f"\nHIGH_RISK Recall   : {r_per[0]:.4f}  ← KEY (costly to miss unsafe prompts)")
@@ -300,7 +311,10 @@ def main() -> None:
     parser.add_argument("--adapter-dir", required=True, help="Path to best_adapter/")
     parser.add_argument("--dataset-dir", required=True, help="Path to split dir (answer_only/ or cot/)")
     parser.add_argument("--output-file", required=True, help="Output CSV path")
-    parser.add_argument("--model-name", default="meta-llama/Llama-3.2-1B")
+    parser.add_argument(
+        "--model-name",
+        default="meta-llama/Llama-3.2-1B-Instruct",
+    )
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--no-4bit", action="store_true")
